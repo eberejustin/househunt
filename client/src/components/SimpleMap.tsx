@@ -51,18 +51,47 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
   // Initialize map once
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    console.log('Map useEffect triggered', { 
+      mapRefCurrent: !!mapRef.current, 
+      mapInstanceRefCurrent: !!mapInstanceRef.current 
+    });
+
+    if (!mapRef.current) {
+      console.log('No mapRef.current available');
+      return;
+    }
+
+    if (mapInstanceRef.current) {
+      console.log('Map already initialized');
+      return;
+    }
 
     console.log('Initializing map...');
+    console.log('Map container dimensions:', {
+      width: mapRef.current.offsetWidth,
+      height: mapRef.current.offsetHeight,
+      display: window.getComputedStyle(mapRef.current).display
+    });
     
     try {
-      const map = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+      const map = L.map(mapRef.current, {
+        center: [40.7128, -74.0060],
+        zoom: 13,
+        zoomControl: true,
+        scrollWheelZoom: true
+      });
       
       console.log('Map created, adding tile layer...');
       
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      });
+      
+      tileLayer.addTo(map);
+      
+      tileLayer.on('loading', () => console.log('Tiles loading...'));
+      tileLayer.on('load', () => console.log('Tiles loaded'));
 
       console.log('Tile layer added');
 
@@ -74,7 +103,7 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
           mapInstanceRef.current.invalidateSize();
           console.log('Map size invalidated');
         }
-      }, 100);
+      }, 200);
 
     } catch (error) {
       console.error('Error initializing map:', error);
@@ -82,6 +111,7 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
     return () => {
       if (mapInstanceRef.current) {
+        console.log('Cleaning up map');
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
@@ -173,7 +203,14 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
         ref={mapRef} 
         className="w-full h-[calc(100vh-64px)]" 
         data-testid="map-container"
-        style={{ minHeight: '400px', background: '#f0f0f0' }}
+        style={{ 
+          minHeight: '400px', 
+          height: 'calc(100vh - 64px)',
+          width: '100%',
+          background: '#f0f0f0',
+          position: 'relative',
+          zIndex: 0
+        }}
       />
       
       {/* Add Apartment Button */}
