@@ -53,13 +53,32 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    const map = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+    console.log('Initializing map...');
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    try {
+      const map = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+      
+      console.log('Map created, adding tile layer...');
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-    mapInstanceRef.current = map;
+      console.log('Tile layer added');
+
+      mapInstanceRef.current = map;
+
+      // Force map resize after a short delay
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+          console.log('Map size invalidated');
+        }
+      }, 100);
+
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    }
 
     return () => {
       if (mapInstanceRef.current) {
@@ -150,7 +169,12 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
   return (
     <div className="flex-1 relative">
-      <div ref={mapRef} className="w-full h-[calc(100vh-64px)]" data-testid="map-container" />
+      <div 
+        ref={mapRef} 
+        className="w-full h-[calc(100vh-64px)]" 
+        data-testid="map-container"
+        style={{ minHeight: '400px', background: '#f0f0f0' }}
+      />
       
       {/* Add Apartment Button */}
       <Button
