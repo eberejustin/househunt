@@ -151,50 +151,15 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
       
       // Create a custom conspicuous marker icon
       const customIcon = L.divIcon({
-        className: 'custom-apartment-marker',
+        className: 'conspicuous-apartment-marker',
         html: `
-          <div style="
-            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
-            border: 4px solid #FFFFFF;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(255,107,107,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transform: scale(1);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1000;
-          ">
-            <div style="
-              color: white;
-              font-weight: bold;
-              font-size: 20px;
-              text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-            ">🏠</div>
+          <div class="marker-circle">
+            <div class="marker-icon">🏠</div>
           </div>
-          <div style="
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(45deg, #FF6B6B, #FF4757);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            white-space: nowrap;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-            margin-top: 6px;
-            border: 2px solid white;
-          ">${apartment.label}</div>
+          <div class="marker-label">${apartment.label}</div>
         `,
-        iconSize: [50, 80],
-        iconAnchor: [25, 40]
+        iconSize: [60, 80],
+        iconAnchor: [30, 40]
       });
 
       const marker = L.marker([apartment.latitude, apartment.longitude], { 
@@ -233,35 +198,12 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
         // Add a bounce effect when clicked
         const element = marker.getElement();
         if (element) {
-          const markerDiv = element.querySelector('div');
-          if (markerDiv) {
-            markerDiv.style.animation = 'bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+          const markerCircle = element.querySelector('.marker-circle');
+          if (markerCircle) {
+            markerCircle.style.animation = 'bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
             setTimeout(() => {
-              if (markerDiv) markerDiv.style.animation = '';
+              if (markerCircle) markerCircle.style.animation = '';
             }, 600);
-          }
-        }
-      });
-
-      // Hover effects for better interactivity
-      marker.on('mouseover', () => {
-        const element = marker.getElement();
-        if (element) {
-          const markerDiv = element.querySelector('div');
-          if (markerDiv) {
-            markerDiv.style.transform = 'scale(1.15)';
-            markerDiv.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5), 0 0 0 6px rgba(255,107,107,0.5)';
-          }
-        }
-      });
-
-      marker.on('mouseout', () => {
-        const element = marker.getElement();
-        if (element) {
-          const markerDiv = element.querySelector('div');
-          if (markerDiv) {
-            markerDiv.style.transform = 'scale(1)';
-            markerDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(255,107,107,0.3)';
           }
         }
       });
