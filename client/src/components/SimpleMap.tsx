@@ -72,7 +72,12 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
   // Update markers when apartments data changes
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !apartments) return;
+    if (!map || !apartments) {
+      console.log('Map or apartments not available:', { map: !!map, apartments: !!apartments, apartmentsData: apartments });
+      return;
+    }
+
+    console.log('Updating map markers with apartments:', apartments);
 
     // Clear existing markers
     Object.values(markersRef.current).forEach(marker => {
@@ -82,7 +87,10 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
     // Add new markers
     const apartmentsArray = apartments as ApartmentWithDetails[];
+    console.log('Processing apartments array:', apartmentsArray);
+    
     apartmentsArray.forEach((apartment) => {
+      console.log('Adding marker for apartment:', apartment);
       const marker = L.marker([apartment.latitude, apartment.longitude]).addTo(map);
       
       const popupContent = `
@@ -109,6 +117,12 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
       markersRef.current[apartment.id] = marker;
     });
+    
+    // Auto-center map on the first apartment if available
+    if (apartmentsArray.length > 0) {
+      const firstApartment = apartmentsArray[0];
+      map.setView([firstApartment.latitude, firstApartment.longitude], 14);
+    }
   }, [apartments, onSelectApartment]);
 
   // Focus on selected apartment

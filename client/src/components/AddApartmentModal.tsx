@@ -88,7 +88,9 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
     },
     onSuccess: (data) => {
       console.log('Mutation success:', data);
+      // Force refresh the apartments data
       queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      queryClient.refetchQueries({ queryKey: ['/api/apartments'] });
       toast({
         title: "Success",
         description: "Apartment added successfully!",
