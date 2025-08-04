@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import Map from "@/components/Map";
+import SimpleMap from "@/components/SimpleMap";
 import Sidebar from "@/components/Sidebar";
 import AddApartmentModal from "@/components/AddApartmentModal";
 import { Button } from "@/components/ui/button";
@@ -158,7 +158,7 @@ export default function Home() {
           searchQuery={searchQuery}
         />
         
-        <Map 
+        <SimpleMap 
           selectedApartmentId={selectedApartmentId}
           onSelectApartment={setSelectedApartmentId}
           onAddApartment={() => setIsAddModalOpen(true)}
