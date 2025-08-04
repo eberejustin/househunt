@@ -73,9 +73,13 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
 
   const addApartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      await apiRequest('POST', '/api/apartments', data);
+      console.log('Mutation function called with:', data);
+      const result = await apiRequest('POST', '/api/apartments', data);
+      console.log('API request result:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
       toast({
         title: "Success",
@@ -85,6 +89,7 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
       onClose();
     },
     onError: (error) => {
+      console.error('Mutation error:', error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -98,7 +103,7 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
       }
       toast({
         title: "Error",
-        description: "Failed to add apartment. Please try again.",
+        description: `Failed to add apartment: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -141,6 +146,9 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
   };
 
   const onSubmit = (data: FormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form validation errors:', form.formState.errors);
+    console.log('Form is valid:', form.formState.isValid);
     addApartmentMutation.mutate(data);
   };
 
