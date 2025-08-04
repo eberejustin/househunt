@@ -148,18 +148,77 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
     
     apartmentsArray.forEach((apartment) => {
       console.log('Adding marker for apartment:', apartment);
-      const marker = L.marker([apartment.latitude, apartment.longitude]).addTo(map);
+      
+      // Create a custom conspicuous marker icon
+      const customIcon = L.divIcon({
+        className: 'custom-apartment-marker',
+        html: `
+          <div style="
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+            border: 4px solid #FFFFFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(255,107,107,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transform: scale(1);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1000;
+          ">
+            <div style="
+              color: white;
+              font-weight: bold;
+              font-size: 20px;
+              text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            ">🏠</div>
+          </div>
+          <div style="
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #FF6B6B, #FF4757);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            margin-top: 6px;
+            border: 2px solid white;
+          ">${apartment.label}</div>
+        `,
+        iconSize: [50, 80],
+        iconAnchor: [25, 40]
+      });
+
+      const marker = L.marker([apartment.latitude, apartment.longitude], { 
+        icon: customIcon,
+        zIndexOffset: 1000
+      }).addTo(map);
       
       const popupContent = `
-        <div class="p-2 min-w-48">
-          <h4 class="font-semibold text-sm mb-1">${apartment.label}</h4>
-          <p class="text-xs text-neutral-600 mb-2">${apartment.address}</p>
-          <div class="flex items-center justify-between text-xs">
-            <span class="font-semibold text-primary">${apartment.rent || 'N/A'}</span>
-            <span class="text-neutral-500">${apartment.bedrooms || 'N/A'} beds</span>
+        <div class="p-3 min-w-[220px]">
+          <div class="flex items-start justify-between mb-2">
+            <h3 class="font-semibold text-lg text-gray-800">${apartment.label}</h3>
+            ${apartment.isFavorited ? '<span class="text-red-500 text-xl">❤️</span>' : ''}
           </div>
-          <div class="flex items-center justify-between mt-2 pt-2 border-t border-neutral-200">
-            <span class="text-xs text-accent">
+          <p class="text-sm text-gray-600 mb-3">${apartment.address}</p>
+          <div class="flex justify-between items-center text-sm mb-2">
+            <span class="text-green-600 font-medium text-base">
+              ${apartment.rent ? `$${apartment.rent}/mo` : 'Rent TBD'}
+            </span>
+            <span class="text-blue-600 font-medium">
+              ${apartment.bedrooms || 'Bedrooms TBD'}
+            </span>
+          </div>
+          <div class="mt-3 pt-2 border-t border-gray-200">
+            <span class="text-sm text-purple-600 font-medium">
               💬 ${apartment.commentCount || 0} comments
             </span>
           </div>
@@ -168,8 +227,43 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
       marker.bindPopup(popupContent);
       
+      // Enhanced marker interactions
       marker.on('click', () => {
         onSelectApartment(apartment.id);
+        // Add a bounce effect when clicked
+        const element = marker.getElement();
+        if (element) {
+          const markerDiv = element.querySelector('div');
+          if (markerDiv) {
+            markerDiv.style.animation = 'bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            setTimeout(() => {
+              if (markerDiv) markerDiv.style.animation = '';
+            }, 600);
+          }
+        }
+      });
+
+      // Hover effects for better interactivity
+      marker.on('mouseover', () => {
+        const element = marker.getElement();
+        if (element) {
+          const markerDiv = element.querySelector('div');
+          if (markerDiv) {
+            markerDiv.style.transform = 'scale(1.15)';
+            markerDiv.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5), 0 0 0 6px rgba(255,107,107,0.5)';
+          }
+        }
+      });
+
+      marker.on('mouseout', () => {
+        const element = marker.getElement();
+        if (element) {
+          const markerDiv = element.querySelector('div');
+          if (markerDiv) {
+            markerDiv.style.transform = 'scale(1)';
+            markerDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4), 0 0 0 4px rgba(255,107,107,0.3)';
+          }
+        }
       });
 
       markersRef.current[apartment.id] = marker;
