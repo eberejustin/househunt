@@ -51,65 +51,73 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
   // Initialize map once
   useEffect(() => {
-    console.log('Map useEffect triggered', { 
-      mapRefCurrent: !!mapRef.current, 
-      mapInstanceRefCurrent: !!mapInstanceRef.current 
-    });
+    const initializeMap = () => {
+      console.log('Map useEffect triggered', { 
+        mapRefCurrent: !!mapRef.current, 
+        mapInstanceRefCurrent: !!mapInstanceRef.current 
+      });
 
-    if (!mapRef.current) {
-      console.log('No mapRef.current available');
-      return;
-    }
+      if (!mapRef.current) {
+        console.log('No mapRef.current available, retrying...');
+        // Retry after a short delay
+        setTimeout(initializeMap, 100);
+        return;
+      }
 
-    if (mapInstanceRef.current) {
-      console.log('Map already initialized');
-      return;
-    }
+      if (mapInstanceRef.current) {
+        console.log('Map already initialized');
+        return;
+      }
 
-    console.log('Initializing map...');
-    console.log('Map container dimensions:', {
-      width: mapRef.current.offsetWidth,
-      height: mapRef.current.offsetHeight,
-      display: window.getComputedStyle(mapRef.current).display
-    });
-    
-    try {
-      const map = L.map(mapRef.current, {
-        center: [40.7128, -74.0060],
-        zoom: 13,
-        zoomControl: true,
-        scrollWheelZoom: true
+      console.log('Initializing map...');
+      console.log('Map container dimensions:', {
+        width: mapRef.current.offsetWidth,
+        height: mapRef.current.offsetHeight,
+        display: window.getComputedStyle(mapRef.current).display
       });
       
-      console.log('Map created, adding tile layer...');
-      
-      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      });
-      
-      tileLayer.addTo(map);
-      
-      tileLayer.on('loading', () => console.log('Tiles loading...'));
-      tileLayer.on('load', () => console.log('Tiles loaded'));
+      try {
+        const map = L.map(mapRef.current, {
+          center: [40.7128, -74.0060],
+          zoom: 13,
+          zoomControl: true,
+          scrollWheelZoom: true
+        });
+        
+        console.log('Map created, adding tile layer...');
+        
+        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        });
+        
+        tileLayer.addTo(map);
+        
+        tileLayer.on('loading', () => console.log('Tiles loading...'));
+        tileLayer.on('load', () => console.log('Tiles loaded'));
 
-      console.log('Tile layer added');
+        console.log('Tile layer added');
 
-      mapInstanceRef.current = map;
+        mapInstanceRef.current = map;
 
-      // Force map resize after a short delay
-      setTimeout(() => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
-          console.log('Map size invalidated');
-        }
-      }, 200);
+        // Force map resize after a short delay
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+            console.log('Map size invalidated');
+          }
+        }, 200);
 
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
+    };
+
+    // Start initialization with a small delay to ensure DOM is ready
+    const timer = setTimeout(initializeMap, 50);
 
     return () => {
+      clearTimeout(timer);
       if (mapInstanceRef.current) {
         console.log('Cleaning up map');
         mapInstanceRef.current.remove();
@@ -191,14 +199,14 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
       <div className="flex-1 flex items-center justify-center bg-neutral-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p className="text-sm text-neutral-600">Loading map...</p>
+          <p className="text-sm text-neutral-600">Loading apartments...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 relative">
+    <div className="flex-1 relative" style={{ display: 'flex', flexDirection: 'column' }}>
       <div 
         ref={mapRef} 
         className="w-full h-[calc(100vh-64px)]" 
@@ -209,7 +217,8 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
           width: '100%',
           background: '#f0f0f0',
           position: 'relative',
-          zIndex: 0
+          zIndex: 0,
+          flex: 1
         }}
       />
       
