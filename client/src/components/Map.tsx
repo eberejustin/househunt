@@ -24,7 +24,12 @@ interface MapProps {
   onAddApartment: () => void;
 }
 
-export default function Map({ selectedApartmentId, onSelectApartment, onAddApartment }: MapProps) {
+export default function Map(props: MapProps) {
+  const { 
+    selectedApartmentId = null, 
+    onSelectApartment = () => {}, 
+    onAddApartment = () => {} 
+  } = props || {};
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef(new Map());
