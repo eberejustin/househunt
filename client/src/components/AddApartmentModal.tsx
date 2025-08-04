@@ -38,14 +38,11 @@ interface AddApartmentModalProps {
   onClose: () => void;
 }
 
-const formSchema = insertApartmentSchema.extend({
+const formSchema = z.object({
+  address: z.string().min(1, "Address is required"),
+  label: z.string().min(1, "Label is required"),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
-}).omit({
-  rent: true,
-  bedrooms: true,
-  notes: true,
-}).extend({
   rent: z.string().optional(),
   bedrooms: z.string().optional(),
   notes: z.string().optional(),
@@ -74,7 +71,18 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
   const addApartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
       console.log('Mutation function called with:', data);
-      const result = await apiRequest('POST', '/api/apartments', data);
+      // Ensure data matches the expected backend schema
+      const apartmentData = {
+        label: data.label,
+        address: data.address,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        rent: data.rent || null,
+        bedrooms: data.bedrooms || null,
+        notes: data.notes || null,
+      };
+      console.log('Sending to API:', apartmentData);
+      const result = await apiRequest('POST', '/api/apartments', apartmentData);
       console.log('API request result:', result);
       return result;
     },
@@ -343,6 +351,10 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
                 type="submit" 
                 disabled={addApartmentMutation.isPending}
                 data-testid="button-add-apartment"
+                onClick={() => {
+                  console.log('Submit button clicked');
+                  console.log('Form errors before submit:', form.formState.errors);
+                }}
               >
                 {addApartmentMutation.isPending ? (
                   <>
