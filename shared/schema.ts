@@ -111,6 +111,10 @@ export const insertApartmentSchema = createInsertSchema(apartments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  rent: z.string().optional().nullable(),
+  bedrooms: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
 });
 
 export const insertCommentSchema = createInsertSchema(comments).omit({

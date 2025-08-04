@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import type { User as UserType } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import Map from "@/components/Map";
 import Sidebar from "@/components/Sidebar";
@@ -53,13 +54,14 @@ export default function Home() {
     return null;
   }
 
-  const userInitials = user.firstName && user.lastName 
-    ? `${user.firstName[0]}${user.lastName[0]}` 
-    : user.email?.[0]?.toUpperCase() || "U";
+  const typedUser = user as UserType;
+  const userInitials = typedUser.firstName && typedUser.lastName 
+    ? `${typedUser.firstName[0]}${typedUser.lastName[0]}` 
+    : typedUser.email?.[0]?.toUpperCase() || "U";
 
-  const displayName = user.firstName && user.lastName 
-    ? `${user.firstName} ${user.lastName[0]}.` 
-    : user.email?.split("@")[0] || "User";
+  const displayName = typedUser.firstName && typedUser.lastName 
+    ? `${typedUser.firstName} ${typedUser.lastName[0]}.` 
+    : typedUser.email?.split("@")[0] || "User";
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -103,7 +105,7 @@ export default function Home() {
                   data-testid="button-user-menu"
                 >
                   <Avatar className="w-6 h-6">
-                    <AvatarImage src={user.profileImageUrl || undefined} />
+                    <AvatarImage src={typedUser.profileImageUrl || undefined} />
                     <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium text-neutral-700">{displayName}</span>

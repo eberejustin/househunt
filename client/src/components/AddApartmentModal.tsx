@@ -41,6 +41,9 @@ interface AddApartmentModalProps {
 const formSchema = insertApartmentSchema.extend({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
+  rent: z.string().optional(),
+  bedrooms: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;

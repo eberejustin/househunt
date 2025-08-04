@@ -39,6 +39,8 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
     retry: false,
   });
 
+  const apartmentsArray = apartments as ApartmentWithDetails[] || [];
+
   const { data: comments, isLoading: commentsLoading } = useQuery({
     queryKey: ['/api/apartments', selectedApartmentId, 'comments'],
     enabled: !!selectedApartmentId,
@@ -46,14 +48,14 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
   });
 
   const selectedApartment = useMemo(() => {
-    if (!selectedApartmentId || !apartments) return null;
-    return apartments.find((apt: ApartmentWithDetails) => apt.id === selectedApartmentId);
-  }, [selectedApartmentId, apartments]);
+    if (!selectedApartmentId || !apartmentsArray) return null;
+    return apartmentsArray.find((apt: ApartmentWithDetails) => apt.id === selectedApartmentId);
+  }, [selectedApartmentId, apartmentsArray]);
 
   const filteredApartments = useMemo(() => {
-    if (!apartments) return [];
+    if (!apartmentsArray) return [];
     
-    let filtered = apartments.filter((apt: ApartmentWithDetails) => {
+    let filtered = apartmentsArray.filter((apt: ApartmentWithDetails) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -71,7 +73,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
     });
     
     return filtered;
-  }, [apartments, searchQuery, filter]);
+  }, [apartmentsArray, searchQuery, filter]);
 
   // Handle unauthorized errors
   if (apartmentsError && isUnauthorizedError(apartmentsError)) {
@@ -152,8 +154,8 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
     });
   };
 
-  const favoriteCount = apartments?.filter((apt: ApartmentWithDetails) => apt.isFavorited).length || 0;
-  const activeCount = apartments?.filter((apt: ApartmentWithDetails) => apt.commentCount > 0).length || 0;
+  const favoriteCount = apartmentsArray?.filter((apt: ApartmentWithDetails) => apt.isFavorited).length || 0;
+  const activeCount = apartmentsArray?.filter((apt: ApartmentWithDetails) => apt.commentCount > 0).length || 0;
 
   return (
     <div className="w-full md:w-96 bg-white border-r border-neutral-200 h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-y-auto">
@@ -174,7 +176,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
             className="flex-1"
             data-testid="button-filter-all"
           >
-            All ({apartments?.length || 0})
+            All ({apartmentsArray?.length || 0})
           </Button>
           <Button
             variant={filter === 'favorites' ? 'default' : 'outline'}
@@ -356,8 +358,8 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mx-auto"></div>
                 </div>
-              ) : comments && comments.length > 0 ? (
-                comments.map((comment: CommentWithUser) => (
+              ) : comments && (comments as CommentWithUser[]).length > 0 ? (
+                (comments as CommentWithUser[]).map((comment: CommentWithUser) => (
                   <div key={comment.id} className="flex space-x-2" data-testid={`comment-${comment.id}`}>
                     <Avatar className="w-6 h-6 flex-shrink-0">
                       <AvatarImage src={comment.user.profileImageUrl || undefined} />

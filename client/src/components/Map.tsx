@@ -27,7 +27,7 @@ interface MapProps {
 export default function Map({ selectedApartmentId, onSelectApartment, onAddApartment }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const markersRef = useRef(new Map());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -35,6 +35,8 @@ export default function Map({ selectedApartmentId, onSelectApartment, onAddApart
     queryKey: ['/api/apartments'],
     retry: false,
   });
+
+  const apartmentsArray = apartments as ApartmentWithDetails[] || [];
 
   // Handle unauthorized errors
   useEffect(() => {
@@ -74,14 +76,14 @@ export default function Map({ selectedApartmentId, onSelectApartment, onAddApart
   // Update markers when apartments change
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !apartments) return;
+    if (!map || !apartmentsArray) return;
 
     // Clear existing markers
-    markersRef.current.forEach(marker => map.removeLayer(marker));
+    markersRef.current.forEach((marker: L.Marker) => map.removeLayer(marker));
     markersRef.current.clear();
 
     // Add new markers
-    apartments.forEach((apartment: ApartmentWithDetails) => {
+    apartmentsArray.forEach((apartment: ApartmentWithDetails) => {
       const isSelected = apartment.id === selectedApartmentId;
       const hasComments = apartment.commentCount > 0;
       
@@ -121,18 +123,18 @@ export default function Map({ selectedApartmentId, onSelectApartment, onAddApart
 
       markersRef.current.set(apartment.id, marker);
     });
-  }, [apartments, selectedApartmentId, onSelectApartment]);
+  }, [apartmentsArray, selectedApartmentId, onSelectApartment]);
 
   // Focus on selected apartment
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !selectedApartmentId || !apartments) return;
+    if (!map || !selectedApartmentId || !apartmentsArray) return;
 
-    const apartment = apartments.find((a: ApartmentWithDetails) => a.id === selectedApartmentId);
+    const apartment = apartmentsArray.find((a: ApartmentWithDetails) => a.id === selectedApartmentId);
     if (apartment) {
       map.setView([apartment.latitude, apartment.longitude], 16);
     }
-  }, [selectedApartmentId, apartments]);
+  }, [selectedApartmentId, apartmentsArray]);
 
   // WebSocket connection for real-time updates
   useEffect(() => {
@@ -176,7 +178,7 @@ export default function Map({ selectedApartmentId, onSelectApartment, onAddApart
 
   const centerMap = () => {
     const map = mapInstanceRef.current;
-    if (map && apartments && apartments.length > 0) {
+    if (map && apartmentsArray && apartmentsArray.length > 0) {
       const group = new L.FeatureGroup(Array.from(markersRef.current.values()));
       map.fitBounds(group.getBounds().pad(0.1));
     }
@@ -245,7 +247,7 @@ export default function Map({ selectedApartmentId, onSelectApartment, onAddApart
         <Plus className="h-6 w-6" />
       </Button>
 
-      <style jsx>{`
+      <style>{`
         .apartment-marker {
           background: hsl(207, 90%, 54%);
           border: 3px solid white;
