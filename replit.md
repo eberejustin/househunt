@@ -12,6 +12,7 @@ Preferred communication style: Simple, everyday language.
 - Added global label management where new labels are available across all apartments for consistent categorization
 - Enhanced apartment display to show labels in both sidebar list view and map popup with color-coded badges
 - Improved label creation workflow to automatically add newly created labels to the apartment they were created from (August 2025)
+- Added label filtering capability to apartment list view for easy categorization and organization (August 2025)
 - Added comprehensive README.md documentation covering project overview, tech stack, setup instructions, API endpoints, and development guidelines (August 2025)
 - Simplified map markers from complex custom styling to clean default Leaflet markers for cleaner appearance
 - Implemented auto-fill functionality where apartment labels automatically match addresses when creating new apartments

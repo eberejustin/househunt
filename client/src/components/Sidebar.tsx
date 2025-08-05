@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Heart, MessageCircle, X, Send, Edit3, ExternalLink, ArrowLeft, Tag } from "lucide-react";
 import { LabelSelector } from "./LabelSelector";
-import type { ApartmentWithDetails, CommentWithUser } from "@shared/schema";
+import type { ApartmentWithDetails, CommentWithUser, Label } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatDistanceToNow } from "date-fns";
@@ -32,6 +32,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
   const [filter, setFilter] = useState<'all' | 'favorites' | 'active'>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
   const [bedroomFilter, setBedroomFilter] = useState<string>('all');
+  const [labelFilter, setLabelFilter] = useState<string>('all');
   const [newComment, setNewComment] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -46,6 +47,12 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
   const { data: comments, isLoading: commentsLoading } = useQuery({
     queryKey: ['/api/apartments', selectedApartmentId, 'comments'],
     enabled: !!selectedApartmentId,
+    retry: false,
+  });
+
+  // Fetch all labels for filtering
+  const { data: allLabels = [] } = useQuery<Label[]>({
+    queryKey: ['/api/labels'],
     retry: false,
   });
 
@@ -71,11 +78,17 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
       if (filter === 'favorites' && !apt.isFavorited) return false;
       if (filter === 'active' && apt.commentCount === 0) return false;
       
+      // Label filter
+      if (labelFilter !== 'all') {
+        const hasLabel = apt.labels?.some(label => label.id === labelFilter);
+        if (!hasLabel) return false;
+      }
+      
       return true;
     });
     
     return filtered;
-  }, [apartmentsArray, searchQuery, filter]);
+  }, [apartmentsArray, searchQuery, filter, labelFilter]);
 
   // Handle unauthorized errors
   if (apartmentsError && isUnauthorizedError(apartmentsError)) {
@@ -336,6 +349,29 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                   <SelectItem value="studio">Studio</SelectItem>
                   <SelectItem value="1br">1BR</SelectItem>
                   <SelectItem value="2br+">2BR+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Label Filter */}
+            <div className="mt-2">
+              <Select value={labelFilter} onValueChange={setLabelFilter}>
+                <SelectTrigger className="text-xs" data-testid="select-label-filter">
+                  <SelectValue placeholder="Filter by Label" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Labels</SelectItem>
+                  {allLabels.map((label: Label) => (
+                    <SelectItem key={label.id} value={label.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: label.color }}
+                        />
+                        <span>{label.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
