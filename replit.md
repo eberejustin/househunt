@@ -5,6 +5,7 @@ HouseHunt is a collaborative apartment hunting application that allows users to 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+User request: Declined autocomplete implementation for apartment address but requested todo list
 
 # Recent Changes
 
