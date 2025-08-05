@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,16 +63,7 @@ export default function AddApartmentModal({
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: editingApartment ? {
-      label: editingApartment.label,
-      address: editingApartment.address,
-      latitude: editingApartment.latitude,
-      longitude: editingApartment.longitude,
-      rent: editingApartment.rent || "",
-      bedrooms: editingApartment.bedrooms || "",
-      notes: editingApartment.notes || "",
-      listingLink: editingApartment.listingLink || "",
-    } : {
+    defaultValues: {
       label: "",
       address: "",
       latitude: 40.7128,
@@ -83,6 +74,33 @@ export default function AddApartmentModal({
       listingLink: "",
     }
   });
+
+  // Reset form when editingApartment changes
+  useEffect(() => {
+    if (editingApartment) {
+      form.reset({
+        label: editingApartment.label,
+        address: editingApartment.address,
+        latitude: editingApartment.latitude,
+        longitude: editingApartment.longitude,
+        rent: editingApartment.rent || "",
+        bedrooms: editingApartment.bedrooms || "",
+        notes: editingApartment.notes || "",
+        listingLink: editingApartment.listingLink || "",
+      });
+    } else {
+      form.reset({
+        label: "",
+        address: "",
+        latitude: 40.7128,
+        longitude: -74.0060,
+        rent: "",
+        bedrooms: "",
+        notes: "",
+        listingLink: "",
+      });
+    }
+  }, [editingApartment, form]);
 
   const apartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
