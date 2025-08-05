@@ -32,6 +32,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertApartmentSchema, type ApartmentWithDetails } from "@shared/schema";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import { createDebouncedSearch, type AddressSuggestion } from "@/lib/geocoding";
 
 interface AddApartmentModalProps {
   isOpen: boolean;
@@ -57,9 +59,9 @@ export default function AddApartmentModal({
   onClose,
   editingApartment,
 }: AddApartmentModalProps) {
-  const [isGeocoding, setIsGeocoding] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const debouncedSearch = createDebouncedSearch();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -102,17 +104,13 @@ export default function AddApartmentModal({
     }
   }, [editingApartment, form]);
 
-  // Auto-fill label when address changes (for new apartments only)
-  useEffect(() => {
-    if (!editingApartment) {
-      const subscription = form.watch((values, { name }) => {
-        if (name === 'address' && values.address) {
-          form.setValue('label', values.address);
-        }
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [editingApartment, form]);
+  // Handle address selection from autocomplete
+  const handleAddressSelect = (suggestion: AddressSuggestion) => {
+    form.setValue('address', suggestion.displayName);
+    form.setValue('label', suggestion.customLabel);
+    form.setValue('latitude', suggestion.coordinates.lat);
+    form.setValue('longitude', suggestion.coordinates.lng);
+  };
 
   const apartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -169,41 +167,7 @@ export default function AddApartmentModal({
     },
   });
 
-  const geocodeAddress = async (address: string) => {
-    if (!address.trim()) return;
 
-    setIsGeocoding(true);
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        form.setValue('latitude', parseFloat(lat));
-        form.setValue('longitude', parseFloat(lon));
-        toast({
-          title: "Address found",
-          description: "Coordinates updated successfully!",
-        });
-      } else {
-        toast({
-          title: "Address not found",
-          description: "Please check the address or enter manually.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Geocoding error",
-        description: "Failed to find address coordinates.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeocoding(false);
-    }
-  };
 
   const onSubmit = (data: FormData) => {
     console.log('Form submitted with data:', data);
@@ -235,27 +199,17 @@ export default function AddApartmentModal({
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <div className="space-y-2">
-                      <Input
-                        placeholder="Enter apartment address..."
-                        {...field}
-                        data-testid="input-address"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => geocodeAddress(field.value)}
-                        disabled={isGeocoding || !field.value.trim()}
-                        className="w-full text-xs"
-                        data-testid="button-geocode"
-                      >
-                        {isGeocoding ? "Finding..." : "Find Coordinates"}
-                      </Button>
-                    </div>
+                    <Autocomplete
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      onOptionSelect={handleAddressSelect}
+                      onSearch={debouncedSearch}
+                      placeholder="Search for apartment address..."
+                      data-testid="input-address"
+                    />
                   </FormControl>
                   <p className="text-xs text-neutral-500">
-                    Click "Find Coordinates" to automatically locate the address
+                    Start typing to search for addresses. Coordinates and label will be auto-filled.
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -276,7 +230,7 @@ export default function AddApartmentModal({
                     />
                   </FormControl>
                   <p className="text-xs text-neutral-500">
-                    Automatically filled with the address. You can customize it if needed.
+                    Auto-filled when you select an address. You can customize it if needed.
                   </p>
                   <FormMessage />
                 </FormItem>
