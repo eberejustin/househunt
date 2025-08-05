@@ -49,6 +49,122 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
     }
   }, [error, toast]);
 
+  // Function to add apartment markers
+  const addApartmentMarkers = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !apartments) {
+      console.log('Cannot add markers - map or apartments not available:', { map: !!map, apartments: !!apartments });
+      return;
+    }
+
+    console.log('Adding apartment markers...');
+
+    // Clear existing markers
+    Object.values(markersRef.current).forEach(marker => {
+      map.removeLayer(marker);
+    });
+    markersRef.current = {};
+
+    const apartmentsArray = apartments as ApartmentWithDetails[];
+    console.log('Processing apartments array:', apartmentsArray);
+    
+    apartmentsArray.forEach((apartment) => {
+      console.log('Adding marker for apartment:', apartment);
+      console.log('Apartment coordinates:', apartment.latitude, apartment.longitude);
+      
+      try {
+        // Create a custom conspicuous marker icon
+        console.log('Creating custom icon...');
+        const customIcon = L.divIcon({
+          className: 'conspicuous-apartment-marker',
+          html: `
+            <div class="marker-circle">
+              <div class="marker-icon">🏠</div>
+            </div>
+            <div class="marker-label">${apartment.label}</div>
+          `,
+          iconSize: [60, 80],
+          iconAnchor: [30, 40]
+        });
+        console.log('Custom icon created:', customIcon);
+
+        console.log('Creating marker...');
+        const marker = L.marker([apartment.latitude, apartment.longitude], { 
+          icon: customIcon,
+          zIndexOffset: 1000
+        });
+        
+        console.log('Adding marker to map...');
+        marker.addTo(map);
+        console.log('Marker added successfully');
+
+        // Verify marker was added
+        setTimeout(() => {
+          const divIcons = document.getElementsByClassName('leaflet-div-icon');
+          console.log('Number of div icons on page:', divIcons.length);
+          const conspicuousMarkers = document.getElementsByClassName('conspicuous-apartment-marker');
+          console.log('Number of conspicuous markers:', conspicuousMarkers.length);
+        }, 100);
+
+        const popupContent = `
+          <div class="p-3 min-w-[220px]">
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="font-semibold text-lg text-gray-800">${apartment.label}</h3>
+              ${apartment.isFavorited ? '<span class="text-red-500 text-xl">❤️</span>' : ''}
+            </div>
+            <p class="text-sm text-gray-600 mb-3">${apartment.address}</p>
+            <div class="flex justify-between items-center text-sm mb-2">
+              <span class="text-green-600 font-medium text-base">
+                ${apartment.rent ? `$${apartment.rent}/mo` : 'Rent TBD'}
+              </span>
+              <span class="text-blue-600 font-medium">
+                ${apartment.bedrooms || 'Bedrooms TBD'}
+              </span>
+            </div>
+            <div class="mt-3 pt-2 border-t border-gray-200">
+              <span class="text-sm text-purple-600 font-medium">
+                💬 ${apartment.commentCount || 0} comments
+              </span>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent);
+        
+        // Enhanced marker interactions
+        marker.on('click', () => {
+          onSelectApartment(apartment.id);
+          // Add a bounce effect when clicked
+          const element = marker.getElement();
+          if (element) {
+            const markerCircle = element.querySelector('.marker-circle');
+            if (markerCircle) {
+              markerCircle.style.animation = 'bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+              setTimeout(() => {
+                if (markerCircle) markerCircle.style.animation = '';
+              }, 600);
+            }
+          }
+        });
+
+        markersRef.current[apartment.id] = marker;
+
+      } catch (error) {
+        console.error('Error creating custom marker, falling back to default:', error);
+        // Fallback to a simple bright marker if custom fails
+        const marker = L.marker([apartment.latitude, apartment.longitude]);
+        marker.addTo(map);
+        markersRef.current[apartment.id] = marker;
+      }
+    });
+    
+    // Auto-center map on the first apartment if available
+    if (apartmentsArray.length > 0) {
+      const firstApartment = apartmentsArray[0];
+      map.setView([firstApartment.latitude, firstApartment.longitude], 14);
+    }
+  }, [apartments, onSelectApartment]);
+
   // Initialize map once
   useEffect(() => {
     const initializeMap = () => {
@@ -105,6 +221,10 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
             console.log('Map size invalidated');
+            
+            // Trigger apartment markers to be added now that map is ready
+            console.log('Map is ready, triggering marker update...');
+            addApartmentMarkers();
           }
         }, 200);
 
@@ -126,127 +246,17 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
     };
   }, []);
 
-  // Update markers when apartments data changes
+  // Update markers when apartments data changes (only if map is ready)
   useEffect(() => {
     console.log('Marker update effect triggered');
-    const map = mapInstanceRef.current;
-    console.log('Map instance:', !!map);
-    console.log('Apartments data:', apartments);
-    
-    if (!map || !apartments) {
-      console.log('Map or apartments not available:', { map: !!map, apartments: !!apartments, apartmentsData: apartments });
-      return;
+    // Only call addApartmentMarkers if both map and apartments are available
+    if (mapInstanceRef.current && apartments) {
+      console.log('Both map and apartments ready, adding markers...');
+      addApartmentMarkers();
+    } else {
+      console.log('Waiting for map or apartments:', { map: !!mapInstanceRef.current, apartments: !!apartments });
     }
-
-    console.log('Both map and apartments are available, proceeding with marker creation');
-
-    // Clear existing markers
-    Object.values(markersRef.current).forEach(marker => {
-      map.removeLayer(marker);
-    });
-    markersRef.current = {};
-
-    // Add new markers
-    const apartmentsArray = apartments as ApartmentWithDetails[];
-    console.log('Processing apartments array:', apartmentsArray);
-    
-    apartmentsArray.forEach((apartment) => {
-      console.log('Adding marker for apartment:', apartment);
-      console.log('Apartment coordinates:', apartment.latitude, apartment.longitude);
-      
-      try {
-        // Create a custom conspicuous marker icon
-        console.log('Creating custom icon...');
-        const customIcon = L.divIcon({
-          className: 'conspicuous-apartment-marker',
-          html: `
-            <div class="marker-circle">
-              <div class="marker-icon">🏠</div>
-            </div>
-            <div class="marker-label">${apartment.label}</div>
-          `,
-          iconSize: [60, 80],
-          iconAnchor: [30, 40]
-        });
-        console.log('Custom icon created:', customIcon);
-
-        console.log('Creating marker...');
-        const marker = L.marker([apartment.latitude, apartment.longitude], { 
-          icon: customIcon,
-          zIndexOffset: 1000
-        });
-        
-        console.log('Adding marker to map...');
-        marker.addTo(map);
-        console.log('Marker added successfully');
-
-        // Verify marker was added
-        setTimeout(() => {
-          const divIcons = document.getElementsByClassName('leaflet-div-icon');
-          console.log('Number of div icons on page:', divIcons.length);
-          const conspicuousMarkers = document.getElementsByClassName('conspicuous-apartment-marker');
-          console.log('Number of conspicuous markers:', conspicuousMarkers.length);
-        }, 500);
-
-      } catch (error) {
-        console.error('Error creating custom marker, falling back to default:', error);
-        // Fallback to a simple bright marker if custom fails
-        const marker = L.marker([apartment.latitude, apartment.longitude]);
-        marker.addTo(map);
-        markersRef.current[apartment.id] = marker;
-        return; // Skip the rest of the processing for this apartment
-      }
-      
-      const popupContent = `
-        <div class="p-3 min-w-[220px]">
-          <div class="flex items-start justify-between mb-2">
-            <h3 class="font-semibold text-lg text-gray-800">${apartment.label}</h3>
-            ${apartment.isFavorited ? '<span class="text-red-500 text-xl">❤️</span>' : ''}
-          </div>
-          <p class="text-sm text-gray-600 mb-3">${apartment.address}</p>
-          <div class="flex justify-between items-center text-sm mb-2">
-            <span class="text-green-600 font-medium text-base">
-              ${apartment.rent ? `$${apartment.rent}/mo` : 'Rent TBD'}
-            </span>
-            <span class="text-blue-600 font-medium">
-              ${apartment.bedrooms || 'Bedrooms TBD'}
-            </span>
-          </div>
-          <div class="mt-3 pt-2 border-t border-gray-200">
-            <span class="text-sm text-purple-600 font-medium">
-              💬 ${apartment.commentCount || 0} comments
-            </span>
-          </div>
-        </div>
-      `;
-
-      marker.bindPopup(popupContent);
-      
-      // Enhanced marker interactions
-      marker.on('click', () => {
-        onSelectApartment(apartment.id);
-        // Add a bounce effect when clicked
-        const element = marker.getElement();
-        if (element) {
-          const markerCircle = element.querySelector('.marker-circle');
-          if (markerCircle) {
-            markerCircle.style.animation = 'bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-            setTimeout(() => {
-              if (markerCircle) markerCircle.style.animation = '';
-            }, 600);
-          }
-        }
-      });
-
-      markersRef.current[apartment.id] = marker;
-    });
-    
-    // Auto-center map on the first apartment if available
-    if (apartmentsArray.length > 0) {
-      const firstApartment = apartmentsArray[0];
-      map.setView([firstApartment.latitude, firstApartment.longitude], 14);
-    }
-  }, [apartments, onSelectApartment]);
+  }, [apartments, addApartmentMarkers]);
 
   // Focus on selected apartment
   useEffect(() => {
