@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ export default function SimpleMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
+  const [isMapReady, setIsMapReady] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -267,9 +268,10 @@ export default function SimpleMap({
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
             console.log("Map size invalidated");
-
-            // Map is ready, markers will be added when apartments data loads
-            console.log("Map is ready, markers will be added when apartments data loads...");
+            
+            // Mark map as ready
+            setIsMapReady(true);
+            console.log("Map is ready, state updated");
           }
         }, 200);
       } catch (error) {
@@ -290,20 +292,20 @@ export default function SimpleMap({
     };
   }, []);
 
-  // Update markers when apartments data changes (only if map is ready)
+  // Update markers when either map becomes ready OR apartments data changes
   useEffect(() => {
-    console.log("Marker update effect triggered");
-    // Only call addApartmentMarkers if both map and apartments are available
-    if (mapInstanceRef.current && apartments) {
+    console.log("Marker update effect triggered", { isMapReady, hasApartments: !!apartments });
+    
+    if (isMapReady && apartments) {
       console.log("Both map and apartments ready, adding markers...");
       addApartmentMarkers();
     } else {
       console.log("Waiting for map or apartments:", {
-        map: !!mapInstanceRef.current,
+        mapReady: isMapReady,
         apartments: !!apartments,
       });
     }
-  }, [apartments, addApartmentMarkers]);
+  }, [isMapReady, apartments, addApartmentMarkers]);
 
   // Focus on selected apartment
   useEffect(() => {
