@@ -272,14 +272,12 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                   }
                 </span>
               </div>
-              {selectedApartment.status && (
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Status:</span>
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium" data-testid="text-selected-apartment-status">
-                    {selectedApartment.status}
-                  </span>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Status:</span>
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium" data-testid="text-selected-apartment-status">
+                  {selectedApartment.status || "Not started"}
+                </span>
+              </div>
               {selectedApartment.listingLink && (
                 <div className="flex justify-between">
                   <span className="text-neutral-600">Listing:</span>
@@ -520,13 +518,11 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                   </div>
                   
                   {/* Status display under icons */}
-                  {apartment.status && (
-                    <div className="mt-2">
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" data-testid={`text-apartment-status-${apartment.id}`}>
-                        {apartment.status}
-                      </span>
-                    </div>
-                  )}
+                  <div className="mt-2">
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" data-testid={`text-apartment-status-${apartment.id}`}>
+                      {apartment.status || "Not started"}
+                    </span>
+                  </div>
                   
                   {/* Labels */}
                   {apartment.labels && apartment.labels.length > 0 && (

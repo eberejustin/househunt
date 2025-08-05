@@ -14,6 +14,11 @@ Deleted listings: Use symmetrical circular grey markers instead of teardrop shap
 
 # Recent Changes
 
+- Added bathroom and status fields to apartment database schema with dropdown options (August 2025)
+- Implemented "3 BR/2 BA" format display for bedrooms/bathrooms across all views (August 2025)
+- Added status tracking with options: Contacted, Viewed, Applied, Rented, and default "Not started" for null values (August 2025)
+- Fixed database queries to properly return bathroom and status fields in API responses (August 2025)
+- Enhanced apartment display to show status badges and bathroom counts in list, detail, and map views (August 2025)
 - Implemented comprehensive labeling system similar to GitHub issues with color-coded labels that can be applied to multiple apartments (August 2025)
 - Added global label management where new labels are available across all apartments for consistent categorization
 - Enhanced apartment display to show labels in both sidebar list view and map popup with color-coded badges

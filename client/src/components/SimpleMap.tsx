@@ -151,11 +151,9 @@ export default function SimpleMap({
                 }
               </span>
             </div>
-            ${apartment.status ? `
-              <div style="text-align: center; margin-bottom: 8px;">
-                <span style="background-color: ${apartment.isDeleted ? '#9CA3AF' : '#dbeafe'}; color: ${apartment.isDeleted ? '#6b7280' : '#1e40af'}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">${apartment.status}</span>
-              </div>
-            ` : ''}
+            <div style="text-align: center; margin-bottom: 8px;">
+              <span style="background-color: ${apartment.isDeleted ? '#9CA3AF' : '#dbeafe'}; color: ${apartment.isDeleted ? '#6b7280' : '#1e40af'}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">${apartment.status || 'Not started'}</span>
+            </div>
             ${apartment.labels && apartment.labels.length > 0 ? `
               <div style="margin: 8px 0;">
                 ${apartment.labels.slice(0, 3).map(label => 
