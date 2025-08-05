@@ -266,9 +266,20 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
               <div className="flex justify-between">
                 <span className="text-neutral-600">Details:</span>
                 <span className="font-medium" data-testid="text-selected-apartment-bedrooms">
-                  {selectedApartment.bedrooms || 'N/A'}
+                  {selectedApartment.bedrooms ? 
+                    `${selectedApartment.bedrooms}${selectedApartment.bathrooms ? `/${selectedApartment.bathrooms} BA` : ''}` : 
+                    'N/A'
+                  }
                 </span>
               </div>
+              {selectedApartment.status && (
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">Status:</span>
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium" data-testid="text-selected-apartment-status">
+                    {selectedApartment.status}
+                  </span>
+                </div>
+              )}
               {selectedApartment.listingLink && (
                 <div className="flex justify-between">
                   <span className="text-neutral-600">Listing:</span>
@@ -508,6 +519,15 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                     </div>
                   </div>
                   
+                  {/* Status display under icons */}
+                  {apartment.status && (
+                    <div className="mt-2">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" data-testid={`text-apartment-status-${apartment.id}`}>
+                        {apartment.status}
+                      </span>
+                    </div>
+                  )}
+                  
                   {/* Labels */}
                   {apartment.labels && apartment.labels.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
@@ -535,18 +555,11 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                         {apartment.rent || 'N/A'}
                       </span>
                       <span className="text-neutral-500" data-testid={`text-apartment-bedrooms-${apartment.id}`}>
-                        {apartment.bedrooms || 'N/A'}
+                        {apartment.bedrooms ? 
+                          `${apartment.bedrooms}${apartment.bathrooms ? `/${apartment.bathrooms} BA` : ''}` : 
+                          'N/A'
+                        }
                       </span>
-                      {apartment.bathrooms && (
-                        <span className="text-neutral-500" data-testid={`text-apartment-bathrooms-${apartment.id}`}>
-                          {apartment.bathrooms} bath
-                        </span>
-                      )}
-                      {apartment.status && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded" data-testid={`text-apartment-status-${apartment.id}`}>
-                          {apartment.status}
-                        </span>
-                      )}
                     </div>
                     <span className="text-neutral-400" data-testid={`text-apartment-updated-${apartment.id}`}>
                       {formatDistanceToNow(new Date(apartment.updatedAt || apartment.createdAt!), { addSuffix: true })}

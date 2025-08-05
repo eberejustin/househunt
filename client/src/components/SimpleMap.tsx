@@ -145,13 +145,15 @@ export default function SimpleMap({
                 ${apartment.rent ? `$${apartment.rent}/mo` : "Rent TBD"}
               </span>
               <span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#2563eb'}; font-weight: 500;">
-                ${apartment.bedrooms || "Bedrooms TBD"}
+                ${apartment.bedrooms ? 
+                  `${apartment.bedrooms}${apartment.bathrooms ? `/${apartment.bathrooms} BA` : ''}` : 
+                  "Bedrooms TBD"
+                }
               </span>
             </div>
-            ${apartment.bathrooms || apartment.status ? `
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 8px;">
-                ${apartment.bathrooms ? `<span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#6b7280'};">${apartment.bathrooms} bath</span>` : '<span></span>'}
-                ${apartment.status ? `<span style="background-color: ${apartment.isDeleted ? '#9CA3AF' : '#dbeafe'}; color: ${apartment.isDeleted ? '#6b7280' : '#1e40af'}; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${apartment.status}</span>` : '<span></span>'}
+            ${apartment.status ? `
+              <div style="text-align: center; margin-bottom: 8px;">
+                <span style="background-color: ${apartment.isDeleted ? '#9CA3AF' : '#dbeafe'}; color: ${apartment.isDeleted ? '#6b7280' : '#1e40af'}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">${apartment.status}</span>
               </div>
             ` : ''}
             ${apartment.labels && apartment.labels.length > 0 ? `
