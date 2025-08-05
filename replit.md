@@ -6,6 +6,13 @@ HouseHunt is a collaborative apartment hunting application that allows users to 
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+- Added comprehensive README.md documentation covering project overview, tech stack, setup instructions, API endpoints, and development guidelines (August 2025)
+- Simplified map markers from complex custom styling to clean default Leaflet markers for cleaner appearance
+- Implemented auto-fill functionality where apartment labels automatically match addresses when creating new apartments
+- Restructured sidebar to toggle between apartment list and detail views with proper navigation
+
 # System Architecture
 
 ## Frontend Architecture
