@@ -290,17 +290,14 @@ export default function SimpleMap({
   }
 
   return (
-    <div
-      className="flex-1 relative"
-      style={{ display: "flex", flexDirection: "column" }}
-    >
+    <div className="relative flex-1 h-full bg-neutral-100">
       <div
         ref={mapRef}
-        className="w-full h-[calc(100vh-64px)]"
+        className="w-full h-full"
         data-testid="map-container"
         style={{
           minHeight: "400px",
-          height: "calc(100vh - 64px)",
+          height: "100%",
           width: "100%",
           background: "#f0f0f0",
           position: "relative",
