@@ -121,3 +121,8 @@ const customLabel = `${address.house_number} ${address.road}`;
 6. Custom Label field auto-populated with "Number Street" format
 7. Coordinates stored for map positioning
 8. User can still edit the custom label if desired
+
+## Fallback Options (✅ IMPLEMENTED)
+1. **Manual Geocoding Button**: If autocomplete fails, user can click "Find Coordinates Manually" button
+2. **Direct Coordinate Entry**: User can manually enter latitude/longitude values in number inputs
+3. **Error Handling**: Clear error messages guide users to fallback options when API fails

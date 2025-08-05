@@ -59,6 +59,7 @@ export default function AddApartmentModal({
   onClose,
   editingApartment,
 }: AddApartmentModalProps) {
+  const [isManualGeocoding, setIsManualGeocoding] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const debouncedSearch = createDebouncedSearch();
@@ -110,6 +111,70 @@ export default function AddApartmentModal({
     form.setValue('label', suggestion.customLabel);
     form.setValue('latitude', suggestion.coordinates.lat);
     form.setValue('longitude', suggestion.coordinates.lng);
+  };
+
+  // Manual geocoding fallback
+  const geocodeAddressManually = async (address: string) => {
+    if (!address.trim()) return;
+
+    setIsManualGeocoding(true);
+    try {
+      const params = new URLSearchParams({
+        format: 'json',
+        addressdetails: '1',
+        limit: '1',
+        q: address.trim(),
+      });
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+        {
+          headers: {
+            'User-Agent': 'HouseHunt-App/1.0',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Geocoding API error: ${response.status}`);
+      }
+
+      const results = await response.json();
+      
+      if (results && results.length > 0) {
+        const result = results[0];
+        form.setValue('latitude', parseFloat(result.lat));
+        form.setValue('longitude', parseFloat(result.lon));
+        
+        // Also try to generate a better label if possible
+        if (result.address && !editingApartment) {
+          const houseNumber = result.address.house_number || '';
+          const road = result.address.road || '';
+          if (houseNumber && road) {
+            form.setValue('label', `${houseNumber} ${road}`);
+          }
+        }
+        
+        toast({
+          title: "Address found",
+          description: "Coordinates updated successfully!",
+        });
+      } else {
+        toast({
+          title: "Address not found",
+          description: "Please check the address or enter coordinates manually.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Geocoding error",
+        description: "Failed to find address coordinates. Please try again or enter coordinates manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsManualGeocoding(false);
+    }
   };
 
   const apartmentMutation = useMutation({
@@ -199,17 +264,30 @@ export default function AddApartmentModal({
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Autocomplete
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onOptionSelect={handleAddressSelect}
-                      onSearch={debouncedSearch}
-                      placeholder="Search for apartment address..."
-                      data-testid="input-address"
-                    />
+                    <div className="space-y-2">
+                      <Autocomplete
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onOptionSelect={handleAddressSelect}
+                        onSearch={debouncedSearch}
+                        placeholder="Search for apartment address..."
+                        data-testid="input-address"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => geocodeAddressManually(field.value)}
+                        disabled={isManualGeocoding || !field.value.trim()}
+                        className="w-full text-xs"
+                        data-testid="button-manual-geocode"
+                      >
+                        {isManualGeocoding ? "Finding..." : "Find Coordinates Manually"}
+                      </Button>
+                    </div>
                   </FormControl>
                   <p className="text-xs text-neutral-500">
-                    Start typing to search for addresses. Coordinates and label will be auto-filled.
+                    Start typing to search addresses, or enter an address and click "Find Coordinates Manually" as fallback.
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -325,6 +403,9 @@ export default function AddApartmentModal({
                 )}
               />
             </div>
+            <p className="text-xs text-neutral-500">
+              Coordinates are auto-filled from address search. You can manually enter them if needed.
+            </p>
 
             <FormField
               control={form.control}

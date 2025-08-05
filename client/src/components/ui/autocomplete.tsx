@@ -7,6 +7,11 @@ interface AutocompleteOption {
   id: string;
   displayName: string;
   customLabel: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  address?: any;
 }
 
 interface AutocompleteProps {
