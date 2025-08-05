@@ -7,7 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import AddApartmentModal from "@/components/AddApartmentModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Plus, User, Users, LogOut } from "lucide-react";
+import { MapPin, Search, Plus, User, Users, LogOut, Map, List } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ export default function Home() {
   const [editingApartment, setEditingApartment] = useState<ApartmentWithDetails | null>(null);
   const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileView, setMobileView] = useState<'list' | 'map'>('list'); // Default to list on mobile
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -64,6 +65,31 @@ export default function Home() {
     ? `${typedUser.firstName} ${typedUser.lastName[0]}.` 
     : typedUser.email?.split("@")[0] || "User";
 
+  // Handle apartment selection with mobile navigation
+  const handleApartmentSelect = (id: string | null) => {
+    setSelectedApartmentId(id);
+    // On mobile, when selecting an apartment, show the list view (detail view)
+    if (id && window.innerWidth < 768) {
+      setMobileView('list');
+    }
+  };
+
+  // Handle map marker click - should focus apartment and show list view on mobile
+  const handleMapMarkerClick = (apartmentId: string | null) => {
+    setSelectedApartmentId(apartmentId);
+    if (apartmentId && window.innerWidth < 768) {
+      setMobileView('list');
+    }
+  };
+
+  // Handle back button - should return to map on mobile
+  const handleBackToMap = () => {
+    if (window.innerWidth < 768) {
+      setMobileView('map');
+      setSelectedApartmentId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Header */}
@@ -89,13 +115,34 @@ export default function Home() {
           </div>
           
           <div className="flex items-center space-x-3">
+            {/* Mobile View Toggle */}
+            <div className="md:hidden flex items-center space-x-1">
+              <Button
+                variant={mobileView === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMobileView('list')}
+                data-testid="button-mobile-list-view"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={mobileView === 'map' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMobileView('map')}
+                data-testid="button-mobile-map-view"
+              >
+                <Map className="h-4 w-4" />
+              </Button>
+            </div>
+
             <Button 
               onClick={() => setIsAddModalOpen(true)}
               className="bg-primary hover:bg-blue-600"
               data-testid="button-add-apartment"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Apartment
+              <span className="hidden sm:inline">Add Apartment</span>
+              <span className="sm:hidden">Add</span>
             </Button>
             
             <DropdownMenu>
@@ -152,19 +199,28 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="flex">
-        <Sidebar 
-          selectedApartmentId={selectedApartmentId}
-          onSelectApartment={setSelectedApartmentId}
-          onEditApartment={setEditingApartment}
-          searchQuery={searchQuery}
-        />
+      <div className="flex h-[calc(100vh-64px)]">
+        {/* Desktop: Always show sidebar */}
+        {/* Mobile: Show sidebar only when mobileView === 'list' */}
+        <div className={`${mobileView === 'list' ? 'w-full' : 'hidden'} md:block md:w-auto`}>
+          <Sidebar 
+            selectedApartmentId={selectedApartmentId}
+            onSelectApartment={handleApartmentSelect}
+            onEditApartment={setEditingApartment}
+            searchQuery={searchQuery}
+            onBackToMap={handleBackToMap}
+          />
+        </div>
         
-        <SimpleMap 
-          selectedApartmentId={selectedApartmentId}
-          onSelectApartment={setSelectedApartmentId}
-          onAddApartment={() => setIsAddModalOpen(true)}
-        />
+        {/* Desktop: Always show map */}
+        {/* Mobile: Show map only when mobileView === 'map' */}
+        <div className={`${mobileView === 'map' ? 'w-full' : 'hidden'} md:block md:flex-1`}>
+          <SimpleMap 
+            selectedApartmentId={selectedApartmentId}
+            onSelectApartment={handleMapMarkerClick}
+            onAddApartment={() => setIsAddModalOpen(true)}
+          />
+        </div>
       </div>
 
       {/* Add/Edit Apartment Modal */}

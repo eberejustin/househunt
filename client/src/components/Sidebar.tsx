@@ -26,9 +26,10 @@ interface SidebarProps {
   onSelectApartment: (id: string | null) => void;
   onEditApartment: (apartment: ApartmentWithDetails) => void;
   searchQuery: string;
+  onBackToMap?: () => void;
 }
 
-export default function Sidebar({ selectedApartmentId, onSelectApartment, onEditApartment, searchQuery }: SidebarProps) {
+export default function Sidebar({ selectedApartmentId, onSelectApartment, onEditApartment, searchQuery, onBackToMap }: SidebarProps) {
   const [filter, setFilter] = useState<'all' | 'favorites' | 'active'>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
   const [bedroomFilter, setBedroomFilter] = useState<string>('all');
@@ -183,9 +184,17 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onSelectApartment(null)}
+                onClick={() => {
+                  // On mobile, if we have the onBackToMap callback, use it to return to map
+                  // On desktop, just clear selection to return to list
+                  if (onBackToMap && window.innerWidth < 768) {
+                    onBackToMap();
+                  } else {
+                    onSelectApartment(null);
+                  }
+                }}
                 className="p-1 h-auto"
-                data-testid="button-back-to-list"
+                data-testid="button-back"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>

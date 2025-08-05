@@ -8,6 +8,8 @@ Preferred communication style: Simple, everyday language.
 User request: Declined autocomplete implementation for apartment address but requested todo list
 Design choice: Use OpenStreetMap Nominatim API for free geocoding
 UX improvement: Auto-populate Custom Label with building number + street name from selected address
+Mobile navigation: Clicking map marker focuses apartment and switches to list view; back button returns to map (not list)
+Mobile responsiveness: Toggle between map view and apartment list view on smaller screens
 
 # Recent Changes
 
@@ -17,7 +19,10 @@ UX improvement: Auto-populate Custom Label with building number + street name fr
 - Improved label creation workflow to automatically add newly created labels to the apartment they were created from (August 2025)
 - Added label filtering capability to apartment list view for easy categorization and organization (August 2025)
 - Implemented address autocomplete using OpenStreetMap Nominatim API with auto-populated custom labels (August 2025)
-- Added comprehensive README.md documentation covering project overview, tech stack, setup instructions, API endpoints, and development guidelines (August 2025)
+- Added comprehensive three-tier geocoding fallback system: autocomplete → manual geocoding button → direct coordinate entry (August 2025)
+- Fixed toast z-index to ensure error popups appear above modals and all UI elements (August 2025)
+- Implemented mobile-responsive design with view toggle between apartment list and map (August 2025)
+- Added mobile navigation: clicking map marker focuses apartment and shows list view, back button returns to map (August 2025)
 - Simplified map markers from complex custom styling to clean default Leaflet markers for cleaner appearance
 - Implemented auto-fill functionality where apartment labels automatically match addresses when creating new apartments
 - Restructured sidebar to toggle between apartment list and detail views with proper navigation
