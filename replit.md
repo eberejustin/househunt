@@ -6,6 +6,8 @@ HouseHunt is a collaborative apartment hunting application that allows users to 
 
 Preferred communication style: Simple, everyday language.
 User request: Declined autocomplete implementation for apartment address but requested todo list
+Design choice: Use OpenStreetMap Nominatim API for free geocoding
+UX improvement: Auto-populate Custom Label with building number + street name from selected address
 
 # Recent Changes
 
