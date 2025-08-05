@@ -114,13 +114,13 @@ export default function SimpleMap({
         let marker;
         
         if (apartment.isDeleted) {
-          // Grey marker for deleted apartments
+          // Grey circular marker for deleted apartments
           const greyIcon = L.divIcon({
             className: 'custom-marker-grey',
-            html: '<div style="background-color: #9CA3AF; width: 25px; height: 41px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
+            html: '<div style="background-color: #9CA3AF; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><div style="width: 8px; height: 8px; background-color: #6B7280; border-radius: 50%;"></div></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -10],
           });
           marker = L.marker([apartment.latitude, apartment.longitude], { icon: greyIcon });
         } else {

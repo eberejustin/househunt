@@ -10,6 +10,7 @@ Design choice: Use OpenStreetMap Nominatim API for free geocoding
 UX improvement: Auto-populate Custom Label with building number + street name from selected address
 Mobile navigation: Clicking map marker focuses apartment and switches to list view; back button returns to map (not list)
 Mobile responsiveness: Toggle between map view and apartment list view on smaller screens
+Deleted listings: Use symmetrical circular grey markers instead of teardrop shapes for better visual distinction
 
 # Recent Changes
 
