@@ -14,7 +14,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Heart, MessageCircle, X, Send, Edit3, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, X, Send, Edit3, ExternalLink, ArrowLeft } from "lucide-react";
 import type { ApartmentWithDetails, CommentWithUser } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -160,233 +160,247 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
 
   return (
     <div className="w-full md:w-96 bg-white border-r border-neutral-200 h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-y-auto">
-      {/* Filter Controls */}
-      <div className="p-4 border-b border-neutral-200 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-neutral-900">Apartments</h2>
-          <Badge variant="secondary" data-testid="text-apartment-count">
-            {filteredApartments.length} found
-          </Badge>
-        </div>
-        
-        <div className="flex space-x-2">
-          <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('all')}
-            className="flex-1"
-            data-testid="button-filter-all"
-          >
-            All ({apartmentsArray?.length || 0})
-          </Button>
-          <Button
-            variant={filter === 'favorites' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('favorites')}
-            className="flex-1"
-            data-testid="button-filter-favorites"
-          >
-            Favorites ({favoriteCount})
-          </Button>
-          <Button
-            variant={filter === 'active' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('active')}
-            className="flex-1"
-            data-testid="button-filter-active"
-          >
-            Active ({activeCount})
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-2">
-          <Select value={priceRange} onValueChange={setPriceRange}>
-            <SelectTrigger className="text-xs" data-testid="select-price-range">
-              <SelectValue placeholder="Price Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Prices</SelectItem>
-              <SelectItem value="1000-1500">$1000-1500</SelectItem>
-              <SelectItem value="1500-2000">$1500-2000</SelectItem>
-              <SelectItem value="2000+">$2000+</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={bedroomFilter} onValueChange={setBedroomFilter}>
-            <SelectTrigger className="text-xs" data-testid="select-bedrooms">
-              <SelectValue placeholder="Bedrooms" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Bedrooms</SelectItem>
-              <SelectItem value="studio">Studio</SelectItem>
-              <SelectItem value="1br">1BR</SelectItem>
-              <SelectItem value="2br+">2BR+</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      {/* Apartment List */}
-      <div className="divide-y divide-neutral-200">
-        {apartmentsLoading ? (
-          <div className="p-4 text-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-sm text-neutral-600">Loading apartments...</p>
+      {selectedApartment ? (
+        /* Apartment Details View */
+        <>
+          {/* Header with back button */}
+          <div className="p-4 border-b border-neutral-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onSelectApartment(null)}
+                className="p-1 h-auto"
+                data-testid="button-back-to-list"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <h3 className="font-semibold text-neutral-900 flex-1" data-testid="text-selected-apartment-label">
+                {selectedApartment.label}
+              </h3>
+            </div>
           </div>
-        ) : filteredApartments.length === 0 ? (
-          <div className="p-4 text-center">
-            <p className="text-sm text-neutral-600">No apartments found</p>
-          </div>
-        ) : (
-          filteredApartments.map((apartment: ApartmentWithDetails) => (
-            <div
-              key={apartment.id}
-              className={`p-4 hover:bg-neutral-50 cursor-pointer transition-colors ${
-                selectedApartmentId === apartment.id ? 'bg-primary/5 border-l-4 border-primary' : ''
-              }`}
-              onClick={() => onSelectApartment(apartment.id)}
-              data-testid={`apartment-item-${apartment.id}`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <h3 className="font-medium text-neutral-900 text-sm" data-testid={`text-apartment-label-${apartment.id}`}>
-                    {apartment.label}
-                  </h3>
-                  <p className="text-xs text-neutral-600 mt-1" data-testid={`text-apartment-address-${apartment.id}`}>
-                    {apartment.address}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-1 ml-2">
+
+          {/* Apartment Details Content */}
+          <div className="p-4" data-testid="apartment-details">
+            <div className="space-y-3 text-sm mb-4">
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Address:</span>
+                <span className="font-medium" data-testid="text-selected-apartment-address">
+                  {selectedApartment.address}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Rent:</span>
+                <span className="font-medium text-primary" data-testid="text-selected-apartment-rent">
+                  {selectedApartment.rent || 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Details:</span>
+                <span className="font-medium" data-testid="text-selected-apartment-bedrooms">
+                  {selectedApartment.bedrooms || 'N/A'}
+                </span>
+              </div>
+              {selectedApartment.listingLink && (
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">Listing:</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="p-1 h-auto"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavoriteMutation.mutate(apartment.id);
-                    }}
-                    data-testid={`button-favorite-${apartment.id}`}
+                    className="p-0 h-auto text-xs text-blue-600 hover:text-blue-800"
+                    onClick={() => window.open(selectedApartment.listingLink!, '_blank')}
+                    data-testid="button-listing-link"
                   >
-                    <Heart 
-                      className={`h-3 w-3 ${apartment.isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-400'}`} 
-                    />
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    View Listing
                   </Button>
-                  <div className="flex items-center text-xs text-accent">
-                    <MessageCircle className="h-3 w-3 mr-1" />
-                    <span data-testid={`text-comment-count-${apartment.id}`}>{apartment.commentCount}</span>
+                </div>
+              )}
+              {selectedApartment.notes && (
+                <div className="pt-2">
+                  <span className="text-neutral-600 block mb-1">Notes:</span>
+                  <p className="text-xs text-neutral-700 bg-neutral-50 p-3 rounded" data-testid="text-selected-apartment-notes">
+                    {selectedApartment.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center space-x-2 mb-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEditApartment(selectedApartment)}
+                className="flex-1"
+                data-testid="button-edit-apartment"
+              >
+                <Edit3 className="h-3 w-3 mr-1" />
+                Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavoriteMutation.mutate(selectedApartment.id);
+                }}
+                className="p-2"
+                data-testid="button-favorite-selected"
+              >
+                <Heart 
+                  className={`h-4 w-4 ${selectedApartment.isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-400'}`} 
+                />
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Apartment List View */
+        <>
+          {/* Filter Controls */}
+          <div className="p-4 border-b border-neutral-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-neutral-900">Apartments</h2>
+              <Badge variant="secondary" data-testid="text-apartment-count">
+                {filteredApartments.length} found
+              </Badge>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('all')}
+                className="flex-1"
+                data-testid="button-filter-all"
+              >
+                All ({apartmentsArray?.length || 0})
+              </Button>
+              <Button
+                variant={filter === 'favorites' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('favorites')}
+                className="flex-1"
+                data-testid="button-filter-favorites"
+              >
+                Favorites ({favoriteCount})
+              </Button>
+              <Button
+                variant={filter === 'active' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('active')}
+                className="flex-1"
+                data-testid="button-filter-active"
+              >
+                Active ({activeCount})
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={priceRange} onValueChange={setPriceRange}>
+                <SelectTrigger className="text-xs" data-testid="select-price-range">
+                  <SelectValue placeholder="Price Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Prices</SelectItem>
+                  <SelectItem value="1000-1500">$1000-1500</SelectItem>
+                  <SelectItem value="1500-2000">$1500-2000</SelectItem>
+                  <SelectItem value="2000+">$2000+</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={bedroomFilter} onValueChange={setBedroomFilter}>
+                <SelectTrigger className="text-xs" data-testid="select-bedrooms">
+                  <SelectValue placeholder="Bedrooms" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Bedrooms</SelectItem>
+                  <SelectItem value="studio">Studio</SelectItem>
+                  <SelectItem value="1br">1BR</SelectItem>
+                  <SelectItem value="2br+">2BR+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          {/* Apartment List */}
+          <div className="divide-y divide-neutral-200">
+            {apartmentsLoading ? (
+              <div className="p-4 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-2 text-sm text-neutral-600">Loading apartments...</p>
+              </div>
+            ) : filteredApartments.length === 0 ? (
+              <div className="p-4 text-center">
+                <p className="text-sm text-neutral-600">No apartments found</p>
+              </div>
+            ) : (
+              filteredApartments.map((apartment: ApartmentWithDetails) => (
+                <div
+                  key={apartment.id}
+                  className={`p-4 hover:bg-neutral-50 cursor-pointer transition-colors ${
+                    selectedApartmentId === apartment.id ? 'bg-primary/5 border-l-4 border-primary' : ''
+                  }`}
+                  onClick={() => onSelectApartment(apartment.id)}
+                  data-testid={`apartment-item-${apartment.id}`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-neutral-900 text-sm" data-testid={`text-apartment-label-${apartment.id}`}>
+                        {apartment.label}
+                      </h3>
+                      <p className="text-xs text-neutral-600 mt-1" data-testid={`text-apartment-address-${apartment.id}`}>
+                        {apartment.address}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-1 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 h-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavoriteMutation.mutate(apartment.id);
+                        }}
+                        data-testid={`button-favorite-${apartment.id}`}
+                      >
+                        <Heart 
+                          className={`h-3 w-3 ${apartment.isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-400'}`} 
+                        />
+                      </Button>
+                      <div className="flex items-center text-xs text-accent">
+                        <MessageCircle className="h-3 w-3 mr-1" />
+                        <span data-testid={`text-comment-count-${apartment.id}`}>{apartment.commentCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-3">
+                      <span className="font-semibold text-primary" data-testid={`text-apartment-rent-${apartment.id}`}>
+                        {apartment.rent || 'N/A'}
+                      </span>
+                      <span className="text-neutral-500" data-testid={`text-apartment-bedrooms-${apartment.id}`}>
+                        {apartment.bedrooms || 'N/A'}
+                      </span>
+                    </div>
+                    <span className="text-neutral-400" data-testid={`text-apartment-updated-${apartment.id}`}>
+                      {formatDistanceToNow(new Date(apartment.updatedAt || apartment.createdAt!), { addSuffix: true })}
+                    </span>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center space-x-3">
-                  <span className="font-semibold text-primary" data-testid={`text-apartment-rent-${apartment.id}`}>
-                    {apartment.rent || 'N/A'}
-                  </span>
-                  <span className="text-neutral-500" data-testid={`text-apartment-bedrooms-${apartment.id}`}>
-                    {apartment.bedrooms || 'N/A'}
-                  </span>
-                </div>
-                <span className="text-neutral-400" data-testid={`text-apartment-updated-${apartment.id}`}>
-                  {formatDistanceToNow(new Date(apartment.updatedAt || apartment.createdAt!), { addSuffix: true })}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+              ))
+            )}
+          </div>
+        </>
+      )}
       
-      {/* Selected Apartment Details */}
+      {/* Comments Section - shown when apartment is selected */}
       {selectedApartment && (
-        <div className="border-t border-neutral-200 bg-neutral-50 p-4" data-testid="apartment-details">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-neutral-900" data-testid="text-selected-apartment-label">
-              {selectedApartment.label}
-            </h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onSelectApartment(null)}
-              className="p-1 h-auto"
-              data-testid="button-close-details"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="space-y-2 text-sm mb-4">
-            <div className="flex justify-between">
-              <span className="text-neutral-600">Address:</span>
-              <span className="font-medium" data-testid="text-selected-apartment-address">
-                {selectedApartment.address}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-600">Rent:</span>
-              <span className="font-medium text-primary" data-testid="text-selected-apartment-rent">
-                {selectedApartment.rent || 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-600">Details:</span>
-              <span className="font-medium" data-testid="text-selected-apartment-bedrooms">
-                {selectedApartment.bedrooms || 'N/A'}
-              </span>
-            </div>
-            {selectedApartment.listingLink && (
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Listing:</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-0 h-auto text-xs text-blue-600 hover:text-blue-800"
-                  onClick={() => window.open(selectedApartment.listingLink!, '_blank')}
-                  data-testid="button-listing-link"
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  View Listing
-                </Button>
-              </div>
-            )}
-            {selectedApartment.notes && (
-              <div className="pt-2">
-                <span className="text-neutral-600 block mb-1">Notes:</span>
-                <p className="text-xs text-neutral-700 bg-white p-2 rounded" data-testid="text-selected-apartment-notes">
-                  {selectedApartment.notes}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex items-center space-x-2 mb-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditApartment(selectedApartment)}
-              className="flex-1"
-              data-testid="button-edit-apartment"
-            >
-              <Edit3 className="h-3 w-3 mr-1" />
-              Edit
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavoriteMutation.mutate(selectedApartment.id);
-              }}
-              className="p-2"
-              data-testid="button-favorite-selected"
-            >
-              <Heart 
-                className={`h-4 w-4 ${selectedApartment.isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-400'}`} 
-              />
-            </Button>
-          </div>
-          
-          <Separator className="my-4" />
+        <div className="border-t border-neutral-200 p-4">
+          <Separator className="mb-4" />
           
           {/* Discussion Thread */}
           <div>
