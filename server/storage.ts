@@ -22,7 +22,7 @@ import {
   type CommentWithUser,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, inArray, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -260,12 +260,12 @@ export class DatabaseStorage implements IStorage {
     const existing = await db
       .select()
       .from(favorites)
-      .where(sql`${favorites.apartmentId} = ${favorite.apartmentId} AND ${favorites.userId} = ${favorite.userId}`);
+      .where(and(eq(favorites.apartmentId, favorite.apartmentId), eq(favorites.userId, favorite.userId)));
 
     if (existing.length > 0) {
       await db
         .delete(favorites)
-        .where(sql`${favorites.apartmentId} = ${favorite.apartmentId} AND ${favorites.userId} = ${favorite.userId}`);
+        .where(and(eq(favorites.apartmentId, favorite.apartmentId), eq(favorites.userId, favorite.userId)));
       return false;
     } else {
       await db.insert(favorites).values(favorite);
@@ -310,11 +310,13 @@ export class DatabaseStorage implements IStorage {
   async removeLabelFromApartment(apartmentId: string, labelId: string): Promise<void> {
     await db
       .delete(apartmentLabels)
-      .where(sql`${apartmentLabels.apartmentId} = ${apartmentId} AND ${apartmentLabels.labelId} = ${labelId}`);
+      .where(and(eq(apartmentLabels.apartmentId, apartmentId), eq(apartmentLabels.labelId, labelId)));
   }
 
   // Helper method to get labels for multiple apartments
   private async getLabelsForApartments(apartmentIds: string[]): Promise<Array<{apartmentId: string, label: Label}>> {
+    if (apartmentIds.length === 0) return [];
+    
     const result = await db
       .select({
         apartmentId: apartmentLabels.apartmentId,
@@ -326,7 +328,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(apartmentLabels)
       .innerJoin(labels, eq(apartmentLabels.labelId, labels.id))
-      .where(sql`${apartmentLabels.apartmentId} = ANY(${apartmentIds})`)
+      .where(inArray(apartmentLabels.apartmentId, apartmentIds))
       .orderBy(labels.name);
     
     return result.map(row => ({
