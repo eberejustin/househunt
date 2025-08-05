@@ -214,12 +214,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/labels', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const labelData = insertLabelSchema.parse({
-        ...req.body,
-        createdBy: userId,
-      });
+      const labelData = insertLabelSchema.parse(req.body);
       
-      const label = await storage.createLabel(labelData);
+      // Add the createdBy field manually since it's omitted from the schema
+      const fullLabelData = {
+        ...labelData,
+        createdBy: userId,
+      };
+      
+      const label = await storage.createLabel(fullLabelData);
       
       // Broadcast to WebSocket clients
       broadcastToClients('label_created', label);

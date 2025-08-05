@@ -278,7 +278,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(labels).orderBy(labels.name);
   }
 
-  async createLabel(label: InsertLabel): Promise<Label> {
+  async createLabel(label: any): Promise<Label> {
     const [created] = await db
       .insert(labels)
       .values(label)
