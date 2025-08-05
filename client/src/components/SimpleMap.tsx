@@ -109,39 +109,55 @@ export default function SimpleMap({
       );
 
       try {
-        // Use simple default Leaflet marker
-        console.log("Creating simple marker...");
-        const marker = L.marker([apartment.latitude, apartment.longitude]);
+        // Create marker with custom icon for deleted apartments
+        console.log("Creating marker...");
+        let marker;
+        
+        if (apartment.isDeleted) {
+          // Grey marker for deleted apartments
+          const greyIcon = L.divIcon({
+            className: 'custom-marker-grey',
+            html: '<div style="background-color: #9CA3AF; width: 25px; height: 41px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+          });
+          marker = L.marker([apartment.latitude, apartment.longitude], { icon: greyIcon });
+        } else {
+          // Default blue marker for active apartments
+          marker = L.marker([apartment.latitude, apartment.longitude]);
+        }
 
         console.log("Adding marker to map...");
         marker.addTo(map);
         console.log("Marker added successfully");
 
         const popupContent = `
-          <div style="padding: 12px; min-width: 200px;">
+          <div style="padding: 12px; min-width: 200px; ${apartment.isDeleted ? 'opacity: 0.7; background-color: #f9fafb;' : ''}">
             <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
-              <h3 style="font-weight: 600; font-size: 16px; color: #374151; margin: 0;">${apartment.label}</h3>
+              <h3 style="font-weight: 600; font-size: 16px; color: ${apartment.isDeleted ? '#9CA3AF' : '#374151'}; margin: 0; ${apartment.isDeleted ? 'text-decoration: line-through;' : ''}">${apartment.label}</h3>
               ${apartment.isFavorited ? '<span style="color: #ef4444; font-size: 18px;">❤️</span>' : ""}
+              ${apartment.isDeleted ? '<span style="color: #9CA3AF; font-size: 14px; margin-left: 8px;">DELETED</span>' : ""}
             </div>
-            <p style="font-size: 14px; color: #6b7280; margin: 0 0 12px 0;">${apartment.address}</p>
+            <p style="font-size: 14px; color: ${apartment.isDeleted ? '#9CA3AF' : '#6b7280'}; margin: 0 0 12px 0; ${apartment.isDeleted ? 'text-decoration: line-through;' : ''}">${apartment.address}</p>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 8px;">
-              <span style="color: #059669; font-weight: 500;">
+              <span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#059669'}; font-weight: 500;">
                 ${apartment.rent ? `$${apartment.rent}/mo` : "Rent TBD"}
               </span>
-              <span style="color: #2563eb; font-weight: 500;">
+              <span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#2563eb'}; font-weight: 500;">
                 ${apartment.bedrooms || "Bedrooms TBD"}
               </span>
             </div>
             ${apartment.labels && apartment.labels.length > 0 ? `
               <div style="margin: 8px 0;">
                 ${apartment.labels.slice(0, 3).map(label => 
-                  `<span style="display: inline-block; background-color: ${label.color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px; margin-bottom: 2px;">${label.name}</span>`
+                  `<span style="display: inline-block; background-color: ${apartment.isDeleted ? '#9CA3AF' : label.color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px; margin-bottom: 2px; ${apartment.isDeleted ? 'text-decoration: line-through;' : ''}">${label.name}</span>`
                 ).join('')}
                 ${apartment.labels.length > 3 ? `<span style="font-size: 11px; color: #6b7280;">+${apartment.labels.length - 3} more</span>` : ''}
               </div>
             ` : ''}
             <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-              <span style="font-size: 14px; color: #7c3aed; font-weight: 500;">
+              <span style="font-size: 14px; color: ${apartment.isDeleted ? '#9CA3AF' : '#7c3aed'}; font-weight: 500;">
                 💬 ${apartment.commentCount || 0} comments
               </span>
             </div>

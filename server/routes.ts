@@ -200,6 +200,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Toggle deleted status
+  app.post("/api/apartments/:id/toggle-deleted", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+
+      const result = await storage.toggleDeleted(id, userId);
+      
+      // Broadcast to WebSocket clients
+      broadcastToClients('apartment_updated', result);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error toggling deleted status:", error);
+      res.status(500).json({ message: "Failed to toggle deleted status" });
+    }
+  });
+
   // Label routes
   app.get('/api/labels', isAuthenticated, async (req: any, res) => {
     try {

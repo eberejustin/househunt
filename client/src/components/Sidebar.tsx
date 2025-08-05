@@ -14,7 +14,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Heart, MessageCircle, X, Send, Edit3, ExternalLink, ArrowLeft, Tag } from "lucide-react";
+import { Heart, MessageCircle, X, Send, Edit3, ExternalLink, ArrowLeft, Tag, Trash2 } from "lucide-react";
 import { LabelSelector } from "./LabelSelector";
 import type { ApartmentWithDetails, CommentWithUser, Label } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -88,7 +88,20 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
       return true;
     });
     
-    return filtered;
+    // Sort: active apartments first (favorites at top), then deleted at bottom
+    return filtered.sort((a, b) => {
+      // Deleted apartments go to bottom
+      if (a.isDeleted && !b.isDeleted) return 1;
+      if (!a.isDeleted && b.isDeleted) return -1;
+      
+      // Among non-deleted apartments, favorites go to top
+      if (!a.isDeleted && !b.isDeleted) {
+        if (a.isFavorited && !b.isFavorited) return -1;
+        if (!a.isFavorited && b.isFavorited) return 1;
+      }
+      
+      return new Date(b.updatedAt || b.createdAt!).getTime() - new Date(a.updatedAt || a.createdAt!).getTime();
+    });
   }, [apartmentsArray, searchQuery, filter, labelFilter]);
 
   // Handle unauthorized errors
@@ -126,6 +139,37 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
       toast({
         title: "Error",
         description: "Failed to update favorite",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleDeletedMutation = useMutation({
+    mutationFn: async (apartmentId: string) => {
+      await apiRequest('POST', `/api/apartments/${apartmentId}/toggle-deleted`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      toast({
+        title: "Success",
+        description: "Apartment status updated",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update apartment status",
         variant: "destructive",
       });
     },
@@ -291,6 +335,19 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                   className={`h-4 w-4 ${selectedApartment.isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-400'}`} 
                 />
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDeletedMutation.mutate(selectedApartment.id);
+                }}
+                className={`p-2 ${selectedApartment.isDeleted ? 'text-green-600 hover:text-green-700' : 'text-red-600 hover:text-red-700'}`}
+                data-testid="button-toggle-deleted"
+                title={selectedApartment.isDeleted ? "Restore apartment" : "Mark as deleted"}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </>
@@ -403,20 +460,33 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                   key={apartment.id}
                   className={`p-4 hover:bg-neutral-50 cursor-pointer transition-colors ${
                     selectedApartmentId === apartment.id ? 'bg-primary/5 border-l-4 border-primary' : ''
-                  }`}
+                  } ${apartment.isDeleted ? 'opacity-60 bg-neutral-50' : ''}`}
                   onClick={() => onSelectApartment(apartment.id)}
                   data-testid={`apartment-item-${apartment.id}`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <h3 className="font-medium text-neutral-900 text-sm" data-testid={`text-apartment-label-${apartment.id}`}>
+                      <h3 className={`font-medium text-sm ${apartment.isDeleted ? 'line-through text-neutral-500' : 'text-neutral-900'}`} data-testid={`text-apartment-label-${apartment.id}`}>
                         {apartment.label}
                       </h3>
-                      <p className="text-xs text-neutral-600 mt-1" data-testid={`text-apartment-address-${apartment.id}`}>
+                      <p className={`text-xs mt-1 ${apartment.isDeleted ? 'line-through text-neutral-400' : 'text-neutral-600'}`} data-testid={`text-apartment-address-${apartment.id}`}>
                         {apartment.address}
                       </p>
                     </div>
                     <div className="flex items-center space-x-1 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1 h-auto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleDeletedMutation.mutate(apartment.id);
+                        }}
+                        data-testid={`button-toggle-deleted-${apartment.id}`}
+                        title={apartment.isDeleted ? "Restore apartment" : "Mark as deleted"}
+                      >
+                        <Trash2 className={`h-3 w-3 ${apartment.isDeleted ? 'text-green-600' : 'text-red-600'}`} />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"

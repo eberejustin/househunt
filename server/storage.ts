@@ -35,6 +35,7 @@ export interface IStorage {
   createApartment(apartment: InsertApartment): Promise<Apartment>;
   updateApartment(id: string, apartment: UpdateApartment): Promise<Apartment | undefined>;
   deleteApartment(id: string): Promise<void>;
+  toggleDeleted(id: string, userId: string): Promise<ApartmentWithDetails>;
   
   // Comment operations
   getComments(apartmentId: string): Promise<CommentWithUser[]>;
@@ -89,6 +90,7 @@ export class DatabaseStorage implements IStorage {
         createdBy: apartments.createdBy,
         createdAt: apartments.createdAt,
         updatedAt: apartments.updatedAt,
+        isDeleted: apartments.isDeleted,
         commentCount: sql<number>`CAST(COUNT(DISTINCT ${comments.id}) AS INTEGER)`,
         isFavorited: sql<boolean>`CAST(COUNT(DISTINCT ${favorites.id}) > 0 AS BOOLEAN)`,
         createdByFirstName: users.firstName,
@@ -118,6 +120,7 @@ export class DatabaseStorage implements IStorage {
       createdBy: row.createdBy,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      isDeleted: row.isDeleted,
       commentCount: row.commentCount,
       isFavorited: row.isFavorited,
       labels: labelsData.filter(labelData => labelData.apartmentId === row.id).map(labelData => labelData.label),
@@ -143,6 +146,7 @@ export class DatabaseStorage implements IStorage {
         createdBy: apartments.createdBy,
         createdAt: apartments.createdAt,
         updatedAt: apartments.updatedAt,
+        isDeleted: apartments.isDeleted,
         commentCount: sql<number>`CAST(COUNT(DISTINCT ${comments.id}) AS INTEGER)`,
         isFavorited: sql<boolean>`CAST(COUNT(DISTINCT ${favorites.id}) > 0 AS BOOLEAN)`,
         createdByFirstName: users.firstName,
@@ -173,6 +177,7 @@ export class DatabaseStorage implements IStorage {
       createdBy: row.createdBy,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      isDeleted: row.isDeleted,
       commentCount: row.commentCount,
       isFavorited: row.isFavorited,
       labels: apartmentLabels,
@@ -202,6 +207,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteApartment(id: string): Promise<void> {
     await db.delete(apartments).where(eq(apartments.id, id));
+  }
+
+  async toggleDeleted(id: string, userId: string): Promise<ApartmentWithDetails> {
+    // First get the current apartment to check ownership and get current state
+    const current = await db
+      .select({ isDeleted: apartments.isDeleted, createdBy: apartments.createdBy })
+      .from(apartments)
+      .where(eq(apartments.id, id));
+
+    if (!current.length) {
+      throw new Error("Apartment not found");
+    }
+
+    if (current[0].createdBy !== userId) {
+      throw new Error("Unauthorized to modify this apartment");
+    }
+
+    // Toggle the deleted status
+    const newDeletedStatus = !current[0].isDeleted;
+    await db
+      .update(apartments)
+      .set({ isDeleted: newDeletedStatus, updatedAt: new Date() })
+      .where(eq(apartments.id, id));
+
+    // Return the updated apartment with full details
+    const updated = await this.getApartment(id, userId);
+    if (!updated) {
+      throw new Error("Failed to retrieve updated apartment");
+    }
+    
+    return updated;
   }
 
   async getComments(apartmentId: string): Promise<CommentWithUser[]> {

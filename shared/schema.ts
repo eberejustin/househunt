@@ -50,6 +50,7 @@ export const apartments = pgTable("apartments", {
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  isDeleted: boolean("is_deleted").default(false).notNull(),
 });
 
 // Comments table
