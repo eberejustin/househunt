@@ -128,13 +128,17 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
 
   // Update markers when apartments data changes
   useEffect(() => {
+    console.log('Marker update effect triggered');
     const map = mapInstanceRef.current;
+    console.log('Map instance:', !!map);
+    console.log('Apartments data:', apartments);
+    
     if (!map || !apartments) {
       console.log('Map or apartments not available:', { map: !!map, apartments: !!apartments, apartmentsData: apartments });
       return;
     }
 
-    console.log('Updating map markers with apartments:', apartments);
+    console.log('Both map and apartments are available, proceeding with marker creation');
 
     // Clear existing markers
     Object.values(markersRef.current).forEach(marker => {
@@ -148,24 +152,50 @@ export default function SimpleMap({ selectedApartmentId, onSelectApartment, onAd
     
     apartmentsArray.forEach((apartment) => {
       console.log('Adding marker for apartment:', apartment);
+      console.log('Apartment coordinates:', apartment.latitude, apartment.longitude);
       
-      // Create a custom conspicuous marker icon
-      const customIcon = L.divIcon({
-        className: 'conspicuous-apartment-marker',
-        html: `
-          <div class="marker-circle">
-            <div class="marker-icon">🏠</div>
-          </div>
-          <div class="marker-label">${apartment.label}</div>
-        `,
-        iconSize: [60, 80],
-        iconAnchor: [30, 40]
-      });
+      try {
+        // Create a custom conspicuous marker icon
+        console.log('Creating custom icon...');
+        const customIcon = L.divIcon({
+          className: 'conspicuous-apartment-marker',
+          html: `
+            <div class="marker-circle">
+              <div class="marker-icon">🏠</div>
+            </div>
+            <div class="marker-label">${apartment.label}</div>
+          `,
+          iconSize: [60, 80],
+          iconAnchor: [30, 40]
+        });
+        console.log('Custom icon created:', customIcon);
 
-      const marker = L.marker([apartment.latitude, apartment.longitude], { 
-        icon: customIcon,
-        zIndexOffset: 1000
-      }).addTo(map);
+        console.log('Creating marker...');
+        const marker = L.marker([apartment.latitude, apartment.longitude], { 
+          icon: customIcon,
+          zIndexOffset: 1000
+        });
+        
+        console.log('Adding marker to map...');
+        marker.addTo(map);
+        console.log('Marker added successfully');
+
+        // Verify marker was added
+        setTimeout(() => {
+          const divIcons = document.getElementsByClassName('leaflet-div-icon');
+          console.log('Number of div icons on page:', divIcons.length);
+          const conspicuousMarkers = document.getElementsByClassName('conspicuous-apartment-marker');
+          console.log('Number of conspicuous markers:', conspicuousMarkers.length);
+        }, 500);
+
+      } catch (error) {
+        console.error('Error creating custom marker, falling back to default:', error);
+        // Fallback to a simple bright marker if custom fails
+        const marker = L.marker([apartment.latitude, apartment.longitude]);
+        marker.addTo(map);
+        markersRef.current[apartment.id] = marker;
+        return; // Skip the rest of the processing for this apartment
+      }
       
       const popupContent = `
         <div class="p-3 min-w-[220px]">
