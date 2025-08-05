@@ -48,6 +48,8 @@ const formSchema = z.object({
   longitude: z.number().min(-180).max(180),
   rent: z.string().optional(),
   bedrooms: z.string().optional(),
+  bathrooms: z.string().optional(),
+  status: z.string().optional(),
   notes: z.string().optional(),
   listingLink: z.string().url().optional().or(z.literal("")),
 });
@@ -73,6 +75,8 @@ export default function AddApartmentModal({
       longitude: -74.0060,
       rent: "",
       bedrooms: "",
+      bathrooms: "",
+      status: "",
       notes: "",
       listingLink: "",
     }
@@ -88,6 +92,8 @@ export default function AddApartmentModal({
         longitude: editingApartment.longitude,
         rent: editingApartment.rent || "",
         bedrooms: editingApartment.bedrooms || "",
+        bathrooms: editingApartment.bathrooms || "",
+        status: editingApartment.status || "",
         notes: editingApartment.notes || "",
         listingLink: editingApartment.listingLink || "",
       });
@@ -99,6 +105,8 @@ export default function AddApartmentModal({
         longitude: -74.0060,
         rent: "",
         bedrooms: "",
+        bathrooms: "",
+        status: "",
         notes: "",
         listingLink: "",
       });
@@ -188,6 +196,8 @@ export default function AddApartmentModal({
         longitude: data.longitude,
         rent: data.rent || null,
         bedrooms: data.bedrooms || null,
+        bathrooms: data.bathrooms || null,
+        status: data.status || null,
         notes: data.notes || null,
         listingLink: data.listingLink || null,
       };
@@ -352,6 +362,56 @@ export default function AddApartmentModal({
                         <SelectItem value="2 BR">2 BR</SelectItem>
                         <SelectItem value="3 BR">3 BR</SelectItem>
                         <SelectItem value="4+ BR">4+ BR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="bathrooms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bathrooms</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-bathrooms">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="1.5">1.5</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="2.5+">2.5+</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-status">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Contacted">Contacted</SelectItem>
+                        <SelectItem value="Viewed">Viewed</SelectItem>
+                        <SelectItem value="Applied">Applied</SelectItem>
+                        <SelectItem value="Rented">Rented</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

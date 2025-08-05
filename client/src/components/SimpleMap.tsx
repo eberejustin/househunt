@@ -148,6 +148,12 @@ export default function SimpleMap({
                 ${apartment.bedrooms || "Bedrooms TBD"}
               </span>
             </div>
+            ${apartment.bathrooms || apartment.status ? `
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 8px;">
+                ${apartment.bathrooms ? `<span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#6b7280'};">${apartment.bathrooms} bath</span>` : '<span></span>'}
+                ${apartment.status ? `<span style="background-color: ${apartment.isDeleted ? '#9CA3AF' : '#dbeafe'}; color: ${apartment.isDeleted ? '#6b7280' : '#1e40af'}; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${apartment.status}</span>` : '<span></span>'}
+              </div>
+            ` : ''}
             ${apartment.labels && apartment.labels.length > 0 ? `
               <div style="margin: 8px 0;">
                 ${apartment.labels.slice(0, 3).map(label => 

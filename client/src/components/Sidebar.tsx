@@ -537,6 +537,16 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                       <span className="text-neutral-500" data-testid={`text-apartment-bedrooms-${apartment.id}`}>
                         {apartment.bedrooms || 'N/A'}
                       </span>
+                      {apartment.bathrooms && (
+                        <span className="text-neutral-500" data-testid={`text-apartment-bathrooms-${apartment.id}`}>
+                          {apartment.bathrooms} bath
+                        </span>
+                      )}
+                      {apartment.status && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-1 py-0.5 rounded" data-testid={`text-apartment-status-${apartment.id}`}>
+                          {apartment.status}
+                        </span>
+                      )}
                     </div>
                     <span className="text-neutral-400" data-testid={`text-apartment-updated-${apartment.id}`}>
                       {formatDistanceToNow(new Date(apartment.updatedAt || apartment.createdAt!), { addSuffix: true })}

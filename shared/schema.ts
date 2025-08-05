@@ -45,6 +45,8 @@ export const apartments = pgTable("apartments", {
   longitude: real("longitude").notNull(),
   rent: varchar("rent"),
   bedrooms: varchar("bedrooms"),
+  bathrooms: varchar("bathrooms"),
+  status: varchar("status"),
   notes: text("notes"),
   listingLink: text("listing_link"),
   createdBy: varchar("created_by").notNull().references(() => users.id),
