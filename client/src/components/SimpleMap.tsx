@@ -52,7 +52,7 @@ export default function SimpleMap({
     console.log('Apartments query state changed:', { 
       isLoading, 
       hasApartments: !!apartments, 
-      apartmentsLength: apartments ? apartments.length : 0,
+      apartmentsLength: apartments && Array.isArray(apartments) ? apartments.length : 0,
       apartmentsData: apartments 
     });
   }, [apartments, isLoading]);
@@ -71,13 +71,13 @@ export default function SimpleMap({
     }
   }, [error, toast]);
 
-  // Function to add apartment markers
+  // Function to add apartment markers with simple default style
   const addApartmentMarkers = useCallback(() => {
     const map = mapInstanceRef.current;
     console.log('addApartmentMarkers called with:', { 
       mapAvailable: !!map, 
       apartmentsAvailable: !!apartments, 
-      apartmentsLength: apartments ? apartments.length : 0,
+      apartmentsLength: apartments && Array.isArray(apartments) ? apartments.length : 0,
       apartmentsType: typeof apartments
     });
     
@@ -109,61 +109,31 @@ export default function SimpleMap({
       );
 
       try {
-        // Create a custom conspicuous marker icon
-        console.log("Creating custom icon...");
-        const customIcon = L.divIcon({
-          className: "conspicuous-apartment-marker",
-          html: `
-            <div class="marker-circle">
-              <div class="marker-icon">🏠</div>
-            </div>
-            <div class="marker-label">${apartment.label}</div>
-          `,
-          iconSize: [60, 80],
-          iconAnchor: [30, 40],
-        });
-        console.log("Custom icon created:", customIcon);
-
-        console.log("Creating marker...");
-        const marker = L.marker([apartment.latitude, apartment.longitude], {
-          icon: customIcon,
-          zIndexOffset: 1000,
-        });
+        // Use simple default Leaflet marker
+        console.log("Creating simple marker...");
+        const marker = L.marker([apartment.latitude, apartment.longitude]);
 
         console.log("Adding marker to map...");
         marker.addTo(map);
         console.log("Marker added successfully");
 
-        // Verify marker was added
-        setTimeout(() => {
-          const divIcons = document.getElementsByClassName("leaflet-div-icon");
-          console.log("Number of div icons on page:", divIcons.length);
-          const conspicuousMarkers = document.getElementsByClassName(
-            "conspicuous-apartment-marker",
-          );
-          console.log(
-            "Number of conspicuous markers:",
-            conspicuousMarkers.length,
-          );
-        }, 100);
-
         const popupContent = `
-          <div class="p-3 min-w-[220px]">
-            <div class="flex items-start justify-between mb-2">
-              <h3 class="font-semibold text-lg text-gray-800">${apartment.label}</h3>
-              ${apartment.isFavorited ? '<span class="text-red-500 text-xl">❤️</span>' : ""}
+          <div style="padding: 12px; min-width: 200px;">
+            <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
+              <h3 style="font-weight: 600; font-size: 16px; color: #374151; margin: 0;">${apartment.label}</h3>
+              ${apartment.isFavorited ? '<span style="color: #ef4444; font-size: 18px;">❤️</span>' : ""}
             </div>
-            <p class="text-sm text-gray-600 mb-3">${apartment.address}</p>
-            <div class="flex justify-between items-center text-sm mb-2">
-              <span class="text-green-600 font-medium text-base">
+            <p style="font-size: 14px; color: #6b7280; margin: 0 0 12px 0;">${apartment.address}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 8px;">
+              <span style="color: #059669; font-weight: 500;">
                 ${apartment.rent ? `$${apartment.rent}/mo` : "Rent TBD"}
               </span>
-              <span class="text-blue-600 font-medium">
+              <span style="color: #2563eb; font-weight: 500;">
                 ${apartment.bedrooms || "Bedrooms TBD"}
               </span>
             </div>
-            <div class="mt-3 pt-2 border-t border-gray-200">
-              <span class="text-sm text-purple-600 font-medium">
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+              <span style="font-size: 14px; color: #7c3aed; font-weight: 500;">
                 💬 ${apartment.commentCount || 0} comments
               </span>
             </div>
@@ -172,33 +142,14 @@ export default function SimpleMap({
 
         marker.bindPopup(popupContent);
 
-        // Enhanced marker interactions
+        // Marker click event to select apartment
         marker.on("click", () => {
           onSelectApartment(apartment.id);
-          // Add a bounce effect when clicked
-          const element = marker.getElement();
-          if (element) {
-            const markerCircle = element.querySelector(".marker-circle");
-            if (markerCircle) {
-              markerCircle.style.animation =
-                "bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
-              setTimeout(() => {
-                if (markerCircle) markerCircle.style.animation = "";
-              }, 600);
-            }
-          }
         });
 
         markersRef.current[apartment.id] = marker;
       } catch (error) {
-        console.error(
-          "Error creating custom marker, falling back to default:",
-          error,
-        );
-        // Fallback to a simple bright marker if custom fails
-        const marker = L.marker([apartment.latitude, apartment.longitude]);
-        marker.addTo(map);
-        markersRef.current[apartment.id] = marker;
+        console.error("Error creating marker:", error);
       }
     });
 

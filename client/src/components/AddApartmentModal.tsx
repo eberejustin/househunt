@@ -102,6 +102,18 @@ export default function AddApartmentModal({
     }
   }, [editingApartment, form]);
 
+  // Auto-fill label when address changes (for new apartments only)
+  useEffect(() => {
+    if (!editingApartment) {
+      const subscription = form.watch((values, { name }) => {
+        if (name === 'address' && values.address) {
+          form.setValue('label', values.address);
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [editingApartment, form]);
+
   const apartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
       console.log('Mutation function called with:', data);
@@ -258,11 +270,14 @@ export default function AddApartmentModal({
                   <FormLabel>Custom Label</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Sunny Downtown Loft"
+                      placeholder="Auto-filled from address"
                       {...field}
                       data-testid="input-label"
                     />
                   </FormControl>
+                  <p className="text-xs text-neutral-500">
+                    Automatically filled with the address. You can customize it if needed.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
