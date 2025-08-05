@@ -51,13 +51,30 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
   // Create label mutation
   const createLabelMutation = useMutation({
     mutationFn: async (data: CreateLabelFormData) => {
-      return apiRequest("POST", "/api/labels", data);
+      const response = await apiRequest("POST", "/api/labels", data);
+      return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/labels"] });
-      setIsCreateDialogOpen(false);
-      form.reset();
-      toast({ title: "Label created successfully" });
+    onSuccess: async (newLabel) => {
+      // Automatically add the new label to the current apartment
+      try {
+        await apiRequest("POST", `/api/apartments/${apartmentId}/labels`, { labelId: newLabel.id });
+        queryClient.invalidateQueries({ queryKey: ["/api/labels"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/apartments"] });
+        onLabelsChange?.();
+        setIsCreateDialogOpen(false);
+        form.reset();
+        toast({ title: "Label created and added to apartment" });
+      } catch (error) {
+        // If adding to apartment fails, still refresh labels list
+        queryClient.invalidateQueries({ queryKey: ["/api/labels"] });
+        setIsCreateDialogOpen(false);
+        form.reset();
+        toast({ 
+          title: "Label created but failed to add to apartment",
+          description: "You can manually add it from the dropdown",
+          variant: "destructive"
+        });
+      }
     },
     onError: (error) => {
       toast({
