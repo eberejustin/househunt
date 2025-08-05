@@ -46,6 +46,7 @@ export const apartments = pgTable("apartments", {
   rent: varchar("rent"),
   bedrooms: varchar("bedrooms"),
   notes: text("notes"),
+  listingLink: text("listing_link"),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -115,7 +116,10 @@ export const insertApartmentSchema = createInsertSchema(apartments).omit({
   rent: z.string().optional().nullable(),
   bedrooms: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  listingLink: z.string().url().optional().nullable(),
 });
+
+export const updateApartmentSchema = insertApartmentSchema.partial();
 
 export const insertCommentSchema = createInsertSchema(comments).omit({
   id: true,
@@ -132,6 +136,7 @@ export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Apartment = typeof apartments.$inferSelect;
 export type InsertApartment = z.infer<typeof insertApartmentSchema>;
+export type UpdateApartment = z.infer<typeof updateApartmentSchema>;
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Favorite = typeof favorites.$inferSelect;

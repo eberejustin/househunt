@@ -7,6 +7,7 @@ import {
   type UpsertUser,
   type Apartment,
   type InsertApartment,
+  type UpdateApartment,
   type Comment,
   type InsertComment,
   type Favorite,
@@ -26,7 +27,7 @@ export interface IStorage {
   getApartments(userId: string): Promise<ApartmentWithDetails[]>;
   getApartment(id: string, userId: string): Promise<ApartmentWithDetails | undefined>;
   createApartment(apartment: InsertApartment): Promise<Apartment>;
-  updateApartment(id: string, apartment: Partial<InsertApartment>): Promise<Apartment | undefined>;
+  updateApartment(id: string, apartment: UpdateApartment): Promise<Apartment | undefined>;
   deleteApartment(id: string): Promise<void>;
   
   // Comment operations
@@ -165,7 +166,7 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async updateApartment(id: string, apartment: Partial<InsertApartment>): Promise<Apartment | undefined> {
+  async updateApartment(id: string, apartment: UpdateApartment): Promise<Apartment | undefined> {
     const [updated] = await db
       .update(apartments)
       .set({ ...apartment, updatedAt: new Date() })

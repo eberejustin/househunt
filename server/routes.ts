@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertApartmentSchema, insertCommentSchema, insertFavoriteSchema } from "@shared/schema";
+import { insertApartmentSchema, updateApartmentSchema, insertCommentSchema, insertFavoriteSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/apartments/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const apartmentData = insertApartmentSchema.partial().parse(req.body);
+      const apartmentData = updateApartmentSchema.parse(req.body);
       
       const apartment = await storage.updateApartment(id, apartmentData);
       if (!apartment) {

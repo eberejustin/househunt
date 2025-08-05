@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import type { User as UserType } from "@shared/schema";
+import type { User as UserType, ApartmentWithDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import SimpleMap from "@/components/SimpleMap";
 import Sidebar from "@/components/Sidebar";
@@ -22,6 +22,7 @@ export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingApartment, setEditingApartment] = useState<ApartmentWithDetails | null>(null);
   const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -155,6 +156,7 @@ export default function Home() {
         <Sidebar 
           selectedApartmentId={selectedApartmentId}
           onSelectApartment={setSelectedApartmentId}
+          onEditApartment={setEditingApartment}
           searchQuery={searchQuery}
         />
         
@@ -165,10 +167,14 @@ export default function Home() {
         />
       </div>
 
-      {/* Add Apartment Modal */}
+      {/* Add/Edit Apartment Modal */}
       <AddApartmentModal 
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        isOpen={isAddModalOpen || !!editingApartment}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingApartment(null);
+        }}
+        editingApartment={editingApartment}
       />
     </div>
   );

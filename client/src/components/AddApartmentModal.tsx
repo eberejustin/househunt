@@ -31,11 +31,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { insertApartmentSchema } from "@shared/schema";
+import { insertApartmentSchema, type ApartmentWithDetails } from "@shared/schema";
 
 interface AddApartmentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editingApartment?: ApartmentWithDetails | null;
 }
 
 const formSchema = z.object({
@@ -46,18 +47,32 @@ const formSchema = z.object({
   rent: z.string().optional(),
   bedrooms: z.string().optional(),
   notes: z.string().optional(),
+  listingLink: z.string().url().optional().or(z.literal("")),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModalProps) {
+export default function AddApartmentModal({
+  isOpen,
+  onClose,
+  editingApartment,
+}: AddApartmentModalProps) {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: editingApartment ? {
+      label: editingApartment.label,
+      address: editingApartment.address,
+      latitude: editingApartment.latitude,
+      longitude: editingApartment.longitude,
+      rent: editingApartment.rent || "",
+      bedrooms: editingApartment.bedrooms || "",
+      notes: editingApartment.notes || "",
+      listingLink: editingApartment.listingLink || "",
+    } : {
       label: "",
       address: "",
       latitude: 40.7128,
@@ -65,10 +80,11 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
       rent: "",
       bedrooms: "",
       notes: "",
+      listingLink: "",
     }
   });
 
-  const addApartmentMutation = useMutation({
+  const apartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
       console.log('Mutation function called with:', data);
       // Ensure data matches the expected backend schema
@@ -80,9 +96,13 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
         rent: data.rent || null,
         bedrooms: data.bedrooms || null,
         notes: data.notes || null,
+        listingLink: data.listingLink || null,
       };
       console.log('Sending to API:', apartmentData);
-      const result = await apiRequest('POST', '/api/apartments', apartmentData);
+      
+      const method = editingApartment ? 'PATCH' : 'POST';
+      const url = editingApartment ? `/api/apartments/${editingApartment.id}` : '/api/apartments';
+      const result = await apiRequest(method, url, apartmentData);
       console.log('API request result:', result);
       return result;
     },
@@ -93,7 +113,7 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
       queryClient.refetchQueries({ queryKey: ['/api/apartments'] });
       toast({
         title: "Success",
-        description: "Apartment added successfully!",
+        description: editingApartment ? "Apartment updated successfully!" : "Apartment added successfully!",
       });
       form.reset();
       onClose();
@@ -113,7 +133,7 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
       }
       toast({
         title: "Error",
-        description: `Failed to add apartment: ${error.message}`,
+        description: `Failed to ${editingApartment ? 'update' : 'add'} apartment: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -159,11 +179,11 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
     console.log('Form submitted with data:', data);
     console.log('Form validation errors:', form.formState.errors);
     console.log('Form is valid:', form.formState.isValid);
-    addApartmentMutation.mutate(data);
+    apartmentMutation.mutate(data);
   };
 
   const handleClose = () => {
-    if (!addApartmentMutation.isPending) {
+    if (!apartmentMutation.isPending) {
       form.reset();
       onClose();
     }
@@ -173,7 +193,7 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md" data-testid="modal-add-apartment">
         <DialogHeader>
-          <DialogTitle>Add New Apartment</DialogTitle>
+          <DialogTitle>{editingApartment ? 'Edit Apartment' : 'Add New Apartment'}</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -321,6 +341,24 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
 
             <FormField
               control={form.control}
+              name="listingLink"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Listing Link (Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://example.com/listing"
+                      {...field}
+                      data-testid="input-listing-link"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
@@ -344,27 +382,27 @@ export default function AddApartmentModal({ isOpen, onClose }: AddApartmentModal
                 type="button" 
                 variant="outline" 
                 onClick={handleClose}
-                disabled={addApartmentMutation.isPending}
+                disabled={apartmentMutation.isPending}
                 data-testid="button-cancel"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
-                disabled={addApartmentMutation.isPending}
-                data-testid="button-add-apartment"
+                disabled={apartmentMutation.isPending}
+                data-testid="button-submit-apartment"
                 onClick={() => {
                   console.log('Submit button clicked');
                   console.log('Form errors before submit:', form.formState.errors);
                 }}
               >
-                {addApartmentMutation.isPending ? (
+                {apartmentMutation.isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Adding...
+                    {editingApartment ? 'Updating...' : 'Adding...'}
                   </>
                 ) : (
-                  "Add Apartment"
+                  editingApartment ? 'Update Apartment' : 'Add Apartment'
                 )}
               </Button>
             </DialogFooter>

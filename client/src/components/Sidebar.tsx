@@ -14,7 +14,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Heart, MessageCircle, X, Send } from "lucide-react";
+import { Heart, MessageCircle, X, Send, Edit3, ExternalLink } from "lucide-react";
 import type { ApartmentWithDetails, CommentWithUser } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -23,10 +23,11 @@ import { formatDistanceToNow } from "date-fns";
 interface SidebarProps {
   selectedApartmentId: string | null;
   onSelectApartment: (id: string | null) => void;
+  onEditApartment: (apartment: ApartmentWithDetails) => void;
   searchQuery: string;
 }
 
-export default function Sidebar({ selectedApartmentId, onSelectApartment, searchQuery }: SidebarProps) {
+export default function Sidebar({ selectedApartmentId, onSelectApartment, onEditApartment, searchQuery }: SidebarProps) {
   const [filter, setFilter] = useState<'all' | 'favorites' | 'active'>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
   const [bedroomFilter, setBedroomFilter] = useState<string>('all');
@@ -332,6 +333,21 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
                 {selectedApartment.bedrooms || 'N/A'}
               </span>
             </div>
+            {selectedApartment.listingLink && (
+              <div className="flex justify-between">
+                <span className="text-neutral-600">Listing:</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-auto text-xs text-blue-600 hover:text-blue-800"
+                  onClick={() => window.open(selectedApartment.listingLink!, '_blank')}
+                  data-testid="button-listing-link"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  View Listing
+                </Button>
+              </div>
+            )}
             {selectedApartment.notes && (
               <div className="pt-2">
                 <span className="text-neutral-600 block mb-1">Notes:</span>
@@ -340,6 +356,34 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, search
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center space-x-2 mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEditApartment(selectedApartment)}
+              className="flex-1"
+              data-testid="button-edit-apartment"
+            >
+              <Edit3 className="h-3 w-3 mr-1" />
+              Edit
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavoriteMutation.mutate(selectedApartment.id);
+              }}
+              className="p-2"
+              data-testid="button-favorite-selected"
+            >
+              <Heart 
+                className={`h-4 w-4 ${selectedApartment.isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-400'}`} 
+              />
+            </Button>
           </div>
           
           <Separator className="my-4" />
