@@ -73,6 +73,22 @@
   }
 
   /* Custom neutral color utilities */
+  
+  /* Toast z-index fix - ensure toasts appear above modals */
+  [data-sonner-toaster] {
+    z-index: 9999 !important;
+  }
+  
+  /* Radix Toast viewport z-index fix */
+  [data-radix-toast-viewport] {
+    z-index: 9999 !important;
+  }
+  
+  /* General toast container z-index */
+  .toast-container,
+  .Toaster {
+    z-index: 9999 !important;
+  }
   .bg-neutral-50 { background-color: var(--neutral-50); }
   .bg-neutral-100 { background-color: var(--neutral-100); }
   .bg-neutral-200 { background-color: var(--neutral-200); }
