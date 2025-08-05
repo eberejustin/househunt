@@ -14,7 +14,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Heart, MessageCircle, X, Send, Edit3, ExternalLink, ArrowLeft } from "lucide-react";
+import { Heart, MessageCircle, X, Send, Edit3, ExternalLink, ArrowLeft, Tag } from "lucide-react";
+import { LabelSelector } from "./LabelSelector";
 import type { ApartmentWithDetails, CommentWithUser } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -227,6 +228,21 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
               )}
             </div>
 
+            {/* Labels Section */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Tag className="h-4 w-4 text-neutral-600" />
+                <span className="text-sm font-medium text-neutral-700">Labels</span>
+              </div>
+              <LabelSelector
+                apartmentId={selectedApartment.id}
+                selectedLabels={selectedApartment.labels || []}
+                onLabelsChange={() => {
+                  queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+                }}
+              />
+            </div>
+
             {/* Action buttons */}
             <div className="flex items-center space-x-2 mb-6">
               <Button
@@ -377,7 +393,28 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between text-xs">
+                  {/* Labels */}
+                  {apartment.labels && apartment.labels.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {apartment.labels.slice(0, 3).map(label => (
+                        <Badge
+                          key={label.id}
+                          style={{ backgroundColor: label.color, color: 'white' }}
+                          className="text-xs px-1 py-0"
+                          data-testid={`apartment-label-${apartment.id}-${label.id}`}
+                        >
+                          {label.name}
+                        </Badge>
+                      ))}
+                      {apartment.labels.length > 3 && (
+                        <Badge variant="secondary" className="text-xs px-1 py-0">
+                          +{apartment.labels.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-between text-xs mt-2">
                     <div className="flex items-center space-x-3">
                       <span className="font-semibold text-primary" data-testid={`text-apartment-rent-${apartment.id}`}>
                         {apartment.rent || 'N/A'}

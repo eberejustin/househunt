@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertApartmentSchema, updateApartmentSchema, insertCommentSchema, insertFavoriteSchema } from "@shared/schema";
+import { insertApartmentSchema, updateApartmentSchema, insertCommentSchema, insertFavoriteSchema, insertLabelSchema, insertApartmentLabelSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -197,6 +197,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error toggling favorite:", error);
       res.status(500).json({ message: "Failed to toggle favorite" });
+    }
+  });
+
+  // Label routes
+  app.get('/api/labels', isAuthenticated, async (req: any, res) => {
+    try {
+      const labels = await storage.getLabels();
+      res.json(labels);
+    } catch (error) {
+      console.error("Error fetching labels:", error);
+      res.status(500).json({ message: "Failed to fetch labels" });
+    }
+  });
+
+  app.post('/api/labels', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const labelData = insertLabelSchema.parse({
+        ...req.body,
+        createdBy: userId,
+      });
+      
+      const label = await storage.createLabel(labelData);
+      
+      // Broadcast to WebSocket clients
+      broadcastToClients('label_created', label);
+      
+      res.status(201).json(label);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid label data", errors: error.errors });
+      }
+      console.error("Error creating label:", error);
+      res.status(500).json({ message: "Failed to create label" });
+    }
+  });
+
+  app.get('/api/apartments/:id/labels', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id: apartmentId } = req.params;
+      const labels = await storage.getApartmentLabels(apartmentId);
+      res.json(labels);
+    } catch (error) {
+      console.error("Error fetching apartment labels:", error);
+      res.status(500).json({ message: "Failed to fetch apartment labels" });
+    }
+  });
+
+  app.post('/api/apartments/:id/labels', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id: apartmentId } = req.params;
+      const { labelId } = req.body;
+      
+      const apartmentLabelData = insertApartmentLabelSchema.parse({
+        apartmentId,
+        labelId,
+      });
+      
+      await storage.addLabelToApartment(apartmentLabelData);
+      
+      // Broadcast to WebSocket clients
+      broadcastToClients('apartment_label_added', { apartmentId, labelId });
+      
+      res.status(201).json({ message: "Label added to apartment" });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid apartment label data", errors: error.errors });
+      }
+      console.error("Error adding label to apartment:", error);
+      res.status(500).json({ message: "Failed to add label to apartment" });
+    }
+  });
+
+  app.delete('/api/apartments/:apartmentId/labels/:labelId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { apartmentId, labelId } = req.params;
+      
+      await storage.removeLabelFromApartment(apartmentId, labelId);
+      
+      // Broadcast to WebSocket clients
+      broadcastToClients('apartment_label_removed', { apartmentId, labelId });
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error removing label from apartment:", error);
+      res.status(500).json({ message: "Failed to remove label from apartment" });
     }
   });
 

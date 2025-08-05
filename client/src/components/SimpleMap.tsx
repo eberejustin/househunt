@@ -132,6 +132,14 @@ export default function SimpleMap({
                 ${apartment.bedrooms || "Bedrooms TBD"}
               </span>
             </div>
+            ${apartment.labels && apartment.labels.length > 0 ? `
+              <div style="margin: 8px 0;">
+                ${apartment.labels.slice(0, 3).map(label => 
+                  `<span style="display: inline-block; background-color: ${label.color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px; margin-bottom: 2px;">${label.name}</span>`
+                ).join('')}
+                ${apartment.labels.length > 3 ? `<span style="font-size: 11px; color: #6b7280;">+${apartment.labels.length - 3} more</span>` : ''}
+              </div>
+            ` : ''}
             <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
               <span style="font-size: 14px; color: #7c3aed; font-weight: 500;">
                 💬 ${apartment.commentCount || 0} comments

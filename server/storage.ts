@@ -3,6 +3,8 @@ import {
   apartments,
   comments,
   favorites,
+  labels,
+  apartmentLabels,
   type User,
   type UpsertUser,
   type Apartment,
@@ -12,6 +14,10 @@ import {
   type InsertComment,
   type Favorite,
   type InsertFavorite,
+  type Label,
+  type InsertLabel,
+  type ApartmentLabel,
+  type InsertApartmentLabel,
   type ApartmentWithDetails,
   type CommentWithUser,
 } from "@shared/schema";
@@ -38,6 +44,13 @@ export interface IStorage {
   // Favorite operations
   getFavorites(userId: string): Promise<string[]>;
   toggleFavorite(favorite: InsertFavorite): Promise<boolean>;
+  
+  // Label operations
+  getLabels(): Promise<Label[]>;
+  createLabel(label: InsertLabel): Promise<Label>;
+  getApartmentLabels(apartmentId: string): Promise<Label[]>;
+  addLabelToApartment(apartmentLabel: InsertApartmentLabel): Promise<void>;
+  removeLabelFromApartment(apartmentId: string, labelId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -88,6 +101,10 @@ export class DatabaseStorage implements IStorage {
       .groupBy(apartments.id, users.firstName, users.lastName)
       .orderBy(desc(apartments.updatedAt));
 
+    // Get labels for each apartment
+    const apartmentIds = result.map(row => row.id);
+    const labelsData = apartmentIds.length > 0 ? await this.getLabelsForApartments(apartmentIds) : [];
+    
     return result.map(row => ({
       id: row.id,
       label: row.label,
@@ -103,6 +120,7 @@ export class DatabaseStorage implements IStorage {
       updatedAt: row.updatedAt,
       commentCount: row.commentCount,
       isFavorited: row.isFavorited,
+      labels: labelsData.filter(labelData => labelData.apartmentId === row.id).map(labelData => labelData.label),
       createdByUser: {
         firstName: row.createdByFirstName,
         lastName: row.createdByLastName,
@@ -140,6 +158,8 @@ export class DatabaseStorage implements IStorage {
     const [row] = result;
     if (!row) return undefined;
 
+    const apartmentLabels = await this.getApartmentLabels(row.id);
+
     return {
       id: row.id,
       label: row.label,
@@ -155,6 +175,7 @@ export class DatabaseStorage implements IStorage {
       updatedAt: row.updatedAt,
       commentCount: row.commentCount,
       isFavorited: row.isFavorited,
+      labels: apartmentLabels,
       createdByUser: {
         firstName: row.createdByFirstName,
         lastName: row.createdByLastName,
@@ -250,6 +271,74 @@ export class DatabaseStorage implements IStorage {
       await db.insert(favorites).values(favorite);
       return true;
     }
+  }
+
+  // Label methods
+  async getLabels(): Promise<Label[]> {
+    return await db.select().from(labels).orderBy(labels.name);
+  }
+
+  async createLabel(label: InsertLabel): Promise<Label> {
+    const [created] = await db
+      .insert(labels)
+      .values(label)
+      .returning();
+    return created;
+  }
+
+  async getApartmentLabels(apartmentId: string): Promise<Label[]> {
+    const result = await db
+      .select({
+        id: labels.id,
+        name: labels.name,
+        color: labels.color,
+        createdBy: labels.createdBy,
+        createdAt: labels.createdAt,
+      })
+      .from(apartmentLabels)
+      .innerJoin(labels, eq(apartmentLabels.labelId, labels.id))
+      .where(eq(apartmentLabels.apartmentId, apartmentId))
+      .orderBy(labels.name);
+    
+    return result;
+  }
+
+  async addLabelToApartment(apartmentLabel: InsertApartmentLabel): Promise<void> {
+    await db.insert(apartmentLabels).values(apartmentLabel);
+  }
+
+  async removeLabelFromApartment(apartmentId: string, labelId: string): Promise<void> {
+    await db
+      .delete(apartmentLabels)
+      .where(sql`${apartmentLabels.apartmentId} = ${apartmentId} AND ${apartmentLabels.labelId} = ${labelId}`);
+  }
+
+  // Helper method to get labels for multiple apartments
+  private async getLabelsForApartments(apartmentIds: string[]): Promise<Array<{apartmentId: string, label: Label}>> {
+    const result = await db
+      .select({
+        apartmentId: apartmentLabels.apartmentId,
+        labelId: labels.id,
+        labelName: labels.name,
+        labelColor: labels.color,
+        labelCreatedBy: labels.createdBy,
+        labelCreatedAt: labels.createdAt,
+      })
+      .from(apartmentLabels)
+      .innerJoin(labels, eq(apartmentLabels.labelId, labels.id))
+      .where(sql`${apartmentLabels.apartmentId} = ANY(${apartmentIds})`)
+      .orderBy(labels.name);
+    
+    return result.map(row => ({
+      apartmentId: row.apartmentId,
+      label: {
+        id: row.labelId,
+        name: row.labelName,
+        color: row.labelColor,
+        createdBy: row.labelCreatedBy,
+        createdAt: row.labelCreatedAt,
+      }
+    }));
   }
 }
 
