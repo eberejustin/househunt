@@ -172,8 +172,9 @@ export const insertFavoriteSchema = createInsertSchema(favorites).omit({
 export const insertLabelSchema = createInsertSchema(labels).omit({
   id: true,
   createdAt: true,
+  createdBy: true, // Server will set this from authenticated user
 }).extend({
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex code").optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex code"),
 });
 
 export const insertApartmentLabelSchema = createInsertSchema(apartmentLabels).omit({

@@ -112,6 +112,7 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
       name: "",
       color: PREDEFINED_COLORS[0],
     },
+    mode: "onSubmit", // Validate on submit only
   });
 
   const handleAddLabel = (labelId: string) => {
@@ -126,6 +127,7 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
   };
 
   const handleCreateLabel = (data: CreateLabelFormData) => {
+    console.log("Form submitted with data:", data);
     createLabelMutation.mutate(data);
   };
 
@@ -192,11 +194,16 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
             <DialogHeader>
               <DialogTitle>Create New Label</DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(handleCreateLabel)} className="space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = form.getValues();
+              console.log("Form data before submission:", formData);
+              handleCreateLabel(formData);
+            }} className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Name</label>
                 <Input
-                  {...form.register("name")}
+                  {...form.register("name", { required: "Name is required" })}
                   placeholder="Enter label name..."
                   data-testid="input-label-name"
                 />
@@ -218,7 +225,10 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
                         form.watch("color") === color ? "border-gray-800" : "border-gray-300"
                       }`}
                       style={{ backgroundColor: color }}
-                      onClick={() => form.setValue("color", color)}
+                      onClick={() => {
+                        console.log("Setting color to:", color);
+                        form.setValue("color", color);
+                      }}
                       data-testid={`color-option-${color}`}
                     />
                   ))}
