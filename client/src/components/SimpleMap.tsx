@@ -123,6 +123,16 @@ export default function SimpleMap({
             popupAnchor: [0, -10],
           });
           marker = L.marker([apartment.latitude, apartment.longitude], { icon: greyIcon });
+        } else if (apartment.isFavorited) {
+          // Red heart icon for favorited apartments
+          const heartIcon = L.divIcon({
+            className: 'custom-marker-heart',
+            html: '<div style="font-size: 24px; color: #ef4444; text-shadow: 0 0 3px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; width: 25px; height: 25px;">❤️</div>',
+            iconSize: [25, 25],
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12],
+          });
+          marker = L.marker([apartment.latitude, apartment.longitude], { icon: heartIcon });
         } else {
           // Default blue marker for active apartments
           marker = L.marker([apartment.latitude, apartment.longitude]);
