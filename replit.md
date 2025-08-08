@@ -19,6 +19,7 @@ Deleted listings: Use symmetrical circular grey markers instead of teardrop shap
 - Added status tracking with options: Contacted, Viewed, Applied, Rented, and default "Not started" for null values (August 2025)
 - Fixed database queries to properly return bathroom and status fields in API responses (August 2025)
 - Enhanced apartment display to show status badges and bathroom counts in list, detail, and map views (August 2025)
+- Fixed mobile map rendering issues by adding proper resize handling and visibility detection for mobile view switching (August 2025)
 - Implemented comprehensive labeling system similar to GitHub issues with color-coded labels that can be applied to multiple apartments (August 2025)
 - Added global label management where new labels are available across all apartments for consistent categorization
 - Enhanced apartment display to show labels in both sidebar list view and map popup with color-coded badges

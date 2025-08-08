@@ -25,12 +25,14 @@ interface SimpleMapProps {
   selectedApartmentId: string | null;
   onSelectApartment: (id: string | null) => void;
   onAddApartment: () => void;
+  isVisible?: boolean; // Add prop to track visibility for mobile
 }
 
 export default function SimpleMap({
   selectedApartmentId,
   onSelectApartment,
   onAddApartment,
+  isVisible = true,
 }: SimpleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -265,6 +267,22 @@ export default function SimpleMap({
             console.log("Map is ready, state updated");
           }
         }, 200);
+        
+        // Additional resize handling for mobile
+        const handleResize = () => {
+          if (mapInstanceRef.current) {
+            setTimeout(() => {
+              mapInstanceRef.current?.invalidateSize();
+            }, 100);
+          }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        
+        // Clean up resize listener
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
       } catch (error) {
         console.error("Error initializing map:", error);
       }
@@ -309,6 +327,19 @@ export default function SimpleMap({
       map.setView([apartment.latitude, apartment.longitude], 16);
     }
   }, [selectedApartmentId, apartments]);
+  
+  // Handle visibility changes (for mobile view switching)
+  useEffect(() => {
+    if (isVisible && mapInstanceRef.current) {
+      // Force map resize when becoming visible
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+          console.log("Map invalidated due to visibility change");
+        }
+      }, 100);
+    }
+  }, [isVisible]);
 
   if (isLoading) {
     return (
@@ -335,6 +366,7 @@ export default function SimpleMap({
           position: "relative",
           zIndex: 0,
           flex: 1,
+          display: "block",
         }}
       />
 

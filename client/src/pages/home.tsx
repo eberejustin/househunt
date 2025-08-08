@@ -219,6 +219,7 @@ export default function Home() {
             selectedApartmentId={selectedApartmentId}
             onSelectApartment={handleMapMarkerClick}
             onAddApartment={() => setIsAddModalOpen(true)}
+            isVisible={mobileView === 'map' || window.innerWidth >= 768}
           />
         </div>
       </div>
