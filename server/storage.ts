@@ -5,6 +5,7 @@ import {
   favorites,
   labels,
   apartmentLabels,
+  notifications,
   type User,
   type UpsertUser,
   type Apartment,
@@ -20,6 +21,9 @@ import {
   type InsertApartmentLabel,
   type ApartmentWithDetails,
   type CommentWithUser,
+  type Notification,
+  type InsertNotification,
+  type NotificationWithDetails,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
@@ -52,6 +56,12 @@ export interface IStorage {
   getApartmentLabels(apartmentId: string): Promise<Label[]>;
   addLabelToApartment(apartmentLabel: InsertApartmentLabel): Promise<void>;
   removeLabelFromApartment(apartmentId: string, labelId: string): Promise<void>;
+  
+  // Notification operations
+  getNotifications(userId: string): Promise<NotificationWithDetails[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: string, userId: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -385,6 +395,73 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.labelCreatedAt,
       }
     }));
+  }
+
+  // Notification operations
+  async getNotifications(userId: string): Promise<NotificationWithDetails[]> {
+    const result = await db
+      .select({
+        id: notifications.id,
+        userId: notifications.userId,
+        actorId: notifications.actorId,
+        apartmentId: notifications.apartmentId,
+        type: notifications.type,
+        title: notifications.title,
+        message: notifications.message,
+        isRead: notifications.isRead,
+        createdAt: notifications.createdAt,
+        actorFirstName: users.firstName,
+        actorLastName: users.lastName,
+        actorProfileImageUrl: users.profileImageUrl,
+        apartmentLabel: apartments.label,
+        apartmentAddress: apartments.address,
+      })
+      .from(notifications)
+      .innerJoin(users, eq(notifications.actorId, users.id))
+      .innerJoin(apartments, eq(notifications.apartmentId, apartments.id))
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(50);
+
+    return result.map(row => ({
+      id: row.id,
+      userId: row.userId,
+      actorId: row.actorId,
+      apartmentId: row.apartmentId,
+      type: row.type,
+      title: row.title,
+      message: row.message,
+      isRead: row.isRead,
+      createdAt: row.createdAt,
+      actor: {
+        firstName: row.actorFirstName,
+        lastName: row.actorLastName,
+        profileImageUrl: row.actorProfileImageUrl,
+      },
+      apartment: {
+        label: row.apartmentLabel,
+        address: row.apartmentAddress,
+      },
+    }));
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [result] = await db.insert(notifications).values(notification).returning();
+    return result;
+  }
+
+  async markNotificationAsRead(id: string, userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, userId));
   }
 }
 

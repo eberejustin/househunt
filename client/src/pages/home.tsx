@@ -8,6 +8,7 @@ import AddApartmentModal from "@/components/AddApartmentModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, Search, Plus, User, Users, LogOut, Map, List } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -135,6 +136,8 @@ export default function Home() {
               </Button>
             </div>
 
+            <NotificationBell />
+            
             <Button 
               onClick={() => setIsAddModalOpen(true)}
               className="bg-primary hover:bg-blue-600"

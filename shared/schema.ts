@@ -89,12 +89,27 @@ export const apartmentLabels = pgTable("apartment_labels", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Notifications table for push notifications
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id), // Who receives the notification
+  actorId: varchar("actor_id").notNull().references(() => users.id), // Who performed the action
+  apartmentId: varchar("apartment_id").notNull().references(() => apartments.id, { onDelete: 'cascade' }),
+  type: varchar("type").notNull(), // 'new_apartment', 'new_comment', 'apartment_updated', 'apartment_favorited'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   apartments: many(apartments),
   comments: many(comments),
   favorites: many(favorites),
   labels: many(labels),
+  notifications: many(notifications, { relationName: "userNotifications" }),
+  actorNotifications: many(notifications, { relationName: "actorNotifications" }),
 }));
 
 export const apartmentsRelations = relations(apartments, ({ one, many }) => ({
@@ -148,6 +163,23 @@ export const apartmentLabelsRelations = relations(apartmentLabels, ({ one }) => 
   }),
 }));
 
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+    relationName: "userNotifications",
+  }),
+  actor: one(users, {
+    fields: [notifications.actorId],
+    references: [users.id],
+    relationName: "actorNotifications",
+  }),
+  apartment: one(apartments, {
+    fields: [notifications.apartmentId],
+    references: [apartments.id],
+  }),
+}));
+
 // Insert schemas
 export const insertApartmentSchema = createInsertSchema(apartments).omit({
   id: true,
@@ -185,6 +217,11 @@ export const insertApartmentLabelSchema = createInsertSchema(apartmentLabels).om
   createdAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
@@ -216,5 +253,20 @@ export type CommentWithUser = Comment & {
     firstName: string | null;
     lastName: string | null;
     profileImageUrl: string | null;
+  };
+};
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+export type NotificationWithDetails = Notification & {
+  actor: {
+    firstName: string | null;
+    lastName: string | null;
+    profileImageUrl: string | null;
+  };
+  apartment: {
+    label: string;
+    address: string;
   };
 };

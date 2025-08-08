@@ -5,6 +5,11 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertApartmentSchema, updateApartmentSchema, insertCommentSchema, insertFavoriteSchema, insertLabelSchema, insertApartmentLabelSchema } from "@shared/schema";
 import { z } from "zod";
+import { 
+  addUserConnection, 
+  createAndBroadcastNotification, 
+  getUserDisplayName 
+} from "./notificationService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -59,8 +64,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const apartment = await storage.createApartment(apartmentData);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('apartment_created', apartment);
+      // Get user info for notifications
+      const user = await storage.getUser(userId);
+      const userName = getUserDisplayName(user || { firstName: null, lastName: null, email: null });
+      
+      // Create and broadcast notification
+      await createAndBroadcastNotification(
+        userId,
+        apartment.id,
+        'apartment_created',
+        'New Apartment Added',
+        `${userName} added a new apartment: ${apartment.label || apartment.address}`
+      );
       
       res.status(201).json(apartment);
     } catch (error) {
@@ -135,8 +150,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const comment = await storage.createComment(commentData);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('comment_created', { apartmentId, comment });
+      // Get user info for notifications
+      const user = await storage.getUser(userId);
+      const userName = getUserDisplayName(user || { firstName: null, lastName: null, email: null });
+      
+      // Get apartment info for context
+      const apartment = await storage.getApartment(apartmentId, userId);
+      
+      if (apartment) {
+        // Create and broadcast notification
+        await createAndBroadcastNotification(
+          userId,
+          apartmentId,
+          'comment_created',
+          'New Comment Added',
+          `${userName} commented on ${apartment.label || apartment.address}: ${comment.content.length > 50 ? comment.content.substring(0, 50) + '...' : comment.content}`
+        );
+      }
       
       res.status(201).json(comment);
     } catch (error) {
@@ -307,35 +337,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notification routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.patch('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { id } = req.params;
+      await storage.markNotificationAsRead(id, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch('/api/notifications/read-all', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
   const httpServer = createServer(app);
 
-  // WebSocket server for real-time collaboration
+  // WebSocket server for real-time notifications
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  wss.on('connection', (ws: WebSocket) => {
-    console.log('WebSocket client connected');
+  wss.on('connection', (ws: WebSocket, req) => {
+    console.log('New WebSocket connection');
     
-    ws.on('close', () => {
-      console.log('WebSocket client disconnected');
+    // Store user ID when they connect (will be set via authentication message)
+    let userId: string | null = null;
+
+    ws.on('message', (message: string) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'authenticate' && data.userId) {
+          userId = data.userId;
+          addUserConnection(userId, ws);
+          ws.send(JSON.stringify({ type: 'authenticated', userId }));
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
     });
-    
+
+    ws.on('close', () => {
+      console.log('WebSocket connection closed');
+      // Connection cleanup is handled automatically in addUserConnection
+    });
+
     ws.on('error', (error) => {
       console.error('WebSocket error:', error);
     });
   });
-
-  // Function to broadcast to all connected WebSocket clients
-  function broadcastToClients(type: string, data: any) {
-    const message = JSON.stringify({ type, data });
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
-  }
-
-  // Make broadcastToClients available globally for use in routes
-  (global as any).broadcastToClients = broadcastToClients;
 
   return httpServer;
 }
