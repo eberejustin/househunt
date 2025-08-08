@@ -39,7 +39,7 @@ export async function searchAddresses(query: string): Promise<AddressSuggestion[
   // Create new controller for this request
   searchController = new AbortController();
 
-  // Validate input
+  // Validate input - keep lower threshold here for manual geocode button
   if (!query || query.trim().length < 3) {
     return [];
   }
@@ -126,7 +126,13 @@ export function createDebouncedSearch() {
       clearTimeout(timeoutId);
     }
 
-    // Set new timeout for 1 second (respect Nominatim rate limits)
+    // Don't search if query is too short (minimum 8 characters)
+    if (!query || query.trim().length < 8) {
+      callback([]);
+      return;
+    }
+
+    // Set new timeout for 500ms (reduced delay with higher character threshold)
     timeoutId = setTimeout(async () => {
       try {
         const results = await searchAddresses(query);
@@ -134,6 +140,6 @@ export function createDebouncedSearch() {
       } catch (error) {
         errorCallback(error instanceof Error ? error : new Error('Unknown error'));
       }
-    }, 1000);
+    }, 500);
   };
 }
