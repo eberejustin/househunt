@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, Search, Plus, User, Users, LogOut, Map, List } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -236,6 +237,9 @@ export default function Home() {
         }}
         editingApartment={editingApartment}
       />
+      
+      {/* Notification Permission Prompt */}
+      <NotificationPermissionPrompt />
     </div>
   );
 }

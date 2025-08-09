@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
+import { usePushNotifications } from "./usePushNotifications";
 
 export function useWebSocket() {
   const { user, isAuthenticated } = useAuth();
@@ -9,6 +10,7 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { showNotification, canShow } = usePushNotifications();
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -46,7 +48,16 @@ export function useWebSocket() {
             // Handle incoming notifications
             const notification = message.data;
             
-            // Show toast notification
+            // Show browser push notification if permission granted
+            if (canShow) {
+              showNotification(notification.title, {
+                message: notification.message,
+                type: notification.type,
+                apartmentId: notification.apartmentId,
+              });
+            }
+            
+            // Also show toast notification as fallback
             toast({
               title: notification.title,
               description: notification.message,
@@ -82,7 +93,7 @@ export function useWebSocket() {
         ws.close();
       }
     };
-  }, [isAuthenticated, user, queryClient, toast]);
+  }, [isAuthenticated, user, queryClient, toast, canShow, showNotification]);
 
   return {
     isConnected,
