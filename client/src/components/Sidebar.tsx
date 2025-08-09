@@ -33,6 +33,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
   const [filter, setFilter] = useState<'all' | 'favorites' | 'active'>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
   const [bedroomFilter, setBedroomFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [labelFilter, setLabelFilter] = useState<string>('all');
   const [newComment, setNewComment] = useState('');
   const { toast } = useToast();
@@ -79,6 +80,12 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
       if (filter === 'favorites' && !apt.isFavorited) return false;
       if (filter === 'active' && apt.commentCount === 0) return false;
       
+      // Status filter
+      if (statusFilter !== 'all') {
+        const aptStatus = apt.status || 'not-started';
+        if (aptStatus !== statusFilter) return false;
+      }
+      
       // Label filter
       if (labelFilter !== 'all') {
         const hasLabel = apt.labels?.some(label => label.id === labelFilter);
@@ -102,7 +109,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
       
       return new Date(b.updatedAt || b.createdAt!).getTime() - new Date(a.updatedAt || a.createdAt!).getTime();
     });
-  }, [apartmentsArray, searchQuery, filter, labelFilter]);
+  }, [apartmentsArray, searchQuery, filter, statusFilter, labelFilter]);
 
   // Handle unauthorized errors
   if (apartmentsError && isUnauthorizedError(apartmentsError)) {
@@ -428,8 +435,22 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
               </Select>
             </div>
             
-            {/* Label Filter */}
-            <div className="mt-2">
+            {/* Status and Label Filters */}
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="text-xs" data-testid="select-status-filter">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="not-started">Not Started</SelectItem>
+                  <SelectItem value="Contacted">Contacted</SelectItem>
+                  <SelectItem value="Viewed">Viewed</SelectItem>
+                  <SelectItem value="Applied">Applied</SelectItem>
+                  <SelectItem value="Rented">Rented</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={labelFilter} onValueChange={setLabelFilter}>
                 <SelectTrigger className="text-xs" data-testid="select-label-filter">
                   <SelectValue placeholder="Filter by Label" />
