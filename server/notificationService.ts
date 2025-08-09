@@ -80,9 +80,9 @@ export async function sendNotificationToAllUsers(excludeUserId: string, notifica
 }
 
 export async function createAndBroadcastNotification(
+  type: string,
   actorId: string,
   apartmentId: string,
-  type: string,
   title: string,
   message: string,
   excludeActorFromNotification = true

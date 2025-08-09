@@ -70,9 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create and broadcast notification
       await createAndBroadcastNotification(
+        'apartment_created',
         userId,
         apartment.id,
-        'apartment_created',
         'New Apartment Added',
         `${userName} added a new apartment: ${apartment.label || apartment.address}`
       );
@@ -97,8 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Apartment not found" });
       }
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('apartment_updated', apartment);
+      // Note: No notification needed for apartment updates
       
       res.json(apartment);
     } catch (error) {
@@ -115,8 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       await storage.deleteApartment(id);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('apartment_deleted', { id });
+      // Note: No notification needed for apartment deletion
       
       res.status(204).send();
     } catch (error) {
@@ -160,11 +158,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (apartment) {
         // Create and broadcast notification
         await createAndBroadcastNotification(
+          'comment_created',
           userId,
           apartmentId,
-          'comment_created',
           'New Comment Added',
-          `${userName} commented on ${apartment.label || apartment.address}: ${comment.content.length > 50 ? comment.content.substring(0, 50) + '...' : comment.content}`
+          `${userName} commented on ${apartment.label || apartment.address}: ${comment.text.length > 50 ? comment.text.substring(0, 50) + '...' : comment.text}`
         );
       }
       
@@ -217,11 +215,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create and broadcast notification for favorite toggle
       const apartment = await storage.getApartment(apartmentId, userId);
       if (apartment && isFavorited) {
+        const user = await storage.getUser(userId);
+        const userDisplayName = getUserDisplayName(user || { firstName: null, lastName: null, email: null });
         await createAndBroadcastNotification(
           'favorite_created',
           userId,
           apartmentId,
-          `${await getUserDisplayName(userId)} marked "${apartment.label}" as a favorite`
+          'Apartment Favorited',
+          `${userDisplayName} marked "${apartment.label}" as a favorite`
         );
       }
       
@@ -274,8 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const label = await storage.createLabel(fullLabelData);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('label_created', label);
+      // Note: No notification needed for label creation
       
       res.status(201).json(label);
     } catch (error) {
@@ -310,8 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.addLabelToApartment(apartmentLabelData);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('apartment_label_added', { apartmentId, labelId });
+      // Note: No notification needed for adding labels to apartments
       
       res.status(201).json({ message: "Label added to apartment" });
     } catch (error) {
@@ -329,8 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.removeLabelFromApartment(apartmentId, labelId);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('apartment_label_removed', { apartmentId, labelId });
+      // Note: No notification needed for removing labels from apartments
       
       res.status(204).send();
     } catch (error) {
