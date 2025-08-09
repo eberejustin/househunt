@@ -183,9 +183,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       await storage.deleteComment(id);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('comment_deleted', { id });
-      
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -217,8 +214,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const isFavorited = await storage.toggleFavorite(favoriteData);
       
-      // Broadcast to WebSocket clients
-      broadcastToClients('favorite_toggled', { apartmentId, userId, isFavorited });
+      // Create and broadcast notification for favorite toggle
+      const apartment = await storage.getApartment(apartmentId, userId);
+      if (apartment && isFavorited) {
+        await createAndBroadcastNotification(
+          'favorite_created',
+          userId,
+          apartmentId,
+          `${await getUserDisplayName(userId)} marked "${apartment.label}" as a favorite`
+        );
+      }
       
       res.json({ isFavorited });
     } catch (error) {
@@ -237,9 +242,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
 
       const result = await storage.toggleDeleted(id, userId);
-      
-      // Broadcast to WebSocket clients
-      broadcastToClients('apartment_updated', result);
       
       res.json(result);
     } catch (error) {
