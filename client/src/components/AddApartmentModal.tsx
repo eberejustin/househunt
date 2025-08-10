@@ -200,11 +200,16 @@ export default function AddApartmentModal({
     };
 
     if (isOpen) {
-      checkScrollNeeded();
+      // Check after a small delay to ensure content is rendered
+      setTimeout(checkScrollNeeded, 100);
       const modalElement = modalContentRef.current;
       if (modalElement) {
         modalElement.addEventListener('scroll', checkScrollNeeded);
-        return () => modalElement.removeEventListener('scroll', checkScrollNeeded);
+        window.addEventListener('resize', checkScrollNeeded);
+        return () => {
+          modalElement.removeEventListener('scroll', checkScrollNeeded);
+          window.removeEventListener('resize', checkScrollNeeded);
+        };
       }
     }
   }, [isOpen]);
