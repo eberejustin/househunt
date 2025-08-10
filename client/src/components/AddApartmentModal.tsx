@@ -294,13 +294,17 @@ export default function AddApartmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto relative" data-testid="modal-add-apartment" ref={modalContentRef}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-hidden relative" data-testid="modal-add-apartment">
         <DialogHeader>
           <DialogTitle>{editingApartment ? 'Edit Apartment' : 'Add New Apartment'}</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+        <div 
+          ref={modalContentRef}
+          className="overflow-y-auto max-h-[calc(90vh-120px)]"
+        >
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="address"
@@ -570,6 +574,7 @@ export default function AddApartmentModal({
             </DialogFooter>
           </form>
         </Form>
+        </div>
         
         {/* Scroll Down Button */}
         {showScrollButton && (
