@@ -299,7 +299,7 @@ export default function AddApartmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-hidden relative" data-testid="modal-add-apartment">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-hidden" data-testid="modal-add-apartment">
         <DialogHeader>
           <DialogTitle>{editingApartment ? 'Edit Apartment' : 'Add New Apartment'}</DialogTitle>
         </DialogHeader>
@@ -587,7 +587,7 @@ export default function AddApartmentModal({
             type="button"
             variant="outline"
             size="sm"
-            className="absolute bottom-16 right-4 rounded-full p-2 shadow-lg bg-white border-2 hover:bg-neutral-50 z-10"
+            className="fixed bottom-16 right-4 rounded-full p-2 shadow-lg bg-white border-2 hover:bg-neutral-50 z-50"
             onClick={scrollToBottom}
             data-testid="button-scroll-down"
             title="Scroll to bottom"
