@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +34,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { insertApartmentSchema, type ApartmentWithDetails } from "@shared/schema";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { createDebouncedSearch, type AddressSuggestion } from "@/lib/geocoding";
+import { ChevronDown } from "lucide-react";
 
 interface AddApartmentModalProps {
   isOpen: boolean;
@@ -62,9 +63,11 @@ export default function AddApartmentModal({
   editingApartment,
 }: AddApartmentModalProps) {
   const [isManualGeocoding, setIsManualGeocoding] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const debouncedSearch = createDebouncedSearch();
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -185,6 +188,37 @@ export default function AddApartmentModal({
     }
   };
 
+  // Check if scrolling is needed and show/hide scroll button
+  useEffect(() => {
+    const checkScrollNeeded = () => {
+      if (modalContentRef.current) {
+        const { scrollHeight, clientHeight, scrollTop } = modalContentRef.current;
+        const hasScrollableContent = scrollHeight > clientHeight;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
+        setShowScrollButton(hasScrollableContent && !isAtBottom);
+      }
+    };
+
+    if (isOpen) {
+      checkScrollNeeded();
+      const modalElement = modalContentRef.current;
+      if (modalElement) {
+        modalElement.addEventListener('scroll', checkScrollNeeded);
+        return () => modalElement.removeEventListener('scroll', checkScrollNeeded);
+      }
+    }
+  }, [isOpen]);
+
+  // Smooth scroll to bottom
+  const scrollToBottom = () => {
+    if (modalContentRef.current) {
+      modalContentRef.current.scrollTo({
+        top: modalContentRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const apartmentMutation = useMutation({
     mutationFn: async (data: FormData) => {
       console.log('Mutation function called with:', data);
@@ -260,10 +294,15 @@ export default function AddApartmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid="modal-add-apartment">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-hidden relative" data-testid="modal-add-apartment">
         <DialogHeader>
           <DialogTitle>{editingApartment ? 'Edit Apartment' : 'Add New Apartment'}</DialogTitle>
         </DialogHeader>
+        
+        <div 
+          ref={modalContentRef}
+          className="overflow-y-auto max-h-[calc(90vh-120px)] pr-2"
+        >
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
@@ -536,6 +575,22 @@ export default function AddApartmentModal({
             </DialogFooter>
           </form>
         </Form>
+        </div>
+        
+        {/* Scroll Down Button */}
+        {showScrollButton && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="absolute bottom-16 right-4 rounded-full p-2 shadow-lg bg-white border-2 hover:bg-neutral-50 z-10"
+            onClick={scrollToBottom}
+            data-testid="button-scroll-down"
+            title="Scroll to bottom"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        )}
       </DialogContent>
     </Dialog>
   );
