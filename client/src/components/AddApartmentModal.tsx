@@ -260,13 +260,13 @@ export default function AddApartmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md" data-testid="modal-add-apartment">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid="modal-add-apartment">
         <DialogHeader>
           <DialogTitle>{editingApartment ? 'Edit Apartment' : 'Add New Apartment'}</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="address"
@@ -274,7 +274,7 @@ export default function AddApartmentModal({
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <Autocomplete
                         value={field.value}
                         onValueChange={field.onChange}
@@ -289,15 +289,15 @@ export default function AddApartmentModal({
                         size="sm"
                         onClick={() => geocodeAddressManually(field.value)}
                         disabled={isManualGeocoding || !field.value.trim()}
-                        className="w-full text-xs"
+                        className="w-full text-xs h-7"
                         data-testid="button-manual-geocode"
                       >
-                        {isManualGeocoding ? "Finding..." : "Find Coordinates Manually"}
+                        {isManualGeocoding ? "Finding..." : "Find Coordinates"}
                       </Button>
                     </div>
                   </FormControl>
-                  <p className="text-xs text-neutral-500">
-                    Start typing to search addresses, or enter an address and click "Find Coordinates Manually" as fallback.
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Start typing to search addresses
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -317,8 +317,8 @@ export default function AddApartmentModal({
                       data-testid="input-label"
                     />
                   </FormControl>
-                  <p className="text-xs text-neutral-500">
-                    Auto-filled when you select an address. You can customize it if needed.
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Auto-filled from address
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -463,8 +463,8 @@ export default function AddApartmentModal({
                 )}
               />
             </div>
-            <p className="text-xs text-neutral-500">
-              Coordinates are auto-filled from address search. You can manually enter them if needed.
+            <p className="text-xs text-neutral-500 -mt-1">
+              Auto-filled from address search
             </p>
 
             <FormField
@@ -495,7 +495,7 @@ export default function AddApartmentModal({
                     <Textarea
                       placeholder="Any additional details or notes..."
                       className="resize-none"
-                      rows={3}
+                      rows={2}
                       {...field}
                       data-testid="textarea-notes"
                     />
@@ -505,7 +505,7 @@ export default function AddApartmentModal({
               )}
             />
 
-            <DialogFooter className="gap-2">
+            <DialogFooter className="gap-2 pt-2">
               <Button 
                 type="button" 
                 variant="outline" 
