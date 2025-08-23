@@ -159,7 +159,7 @@ export default function Home() {
             {/* Desktop Add Apartment Button - Hidden on mobile */}
             <Button
               onClick={() => setIsAddModalOpen(true)}
-              className="hidden md:flex bg-primary hover:bg-blue-600"
+              className="hidden md:inline-flex bg-primary hover:bg-blue-600"
               data-testid="button-add-apartment"
             >
               <Plus className="h-4 w-4 mr-2" />
