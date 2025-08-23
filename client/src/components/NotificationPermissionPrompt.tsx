@@ -1,15 +1,24 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Bell, BellOff, X } from 'lucide-react';
-import { usePushNotifications } from '../hooks/usePushNotifications';
-import { useToast } from '../hooks/use-toast';
+import { useState } from "react";
+import { Button } from "./ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Bell, BellOff, X } from "lucide-react";
+import { usePushNotifications } from "../hooks/usePushNotifications";
+import { useToast } from "../hooks/use-toast";
 
 interface NotificationPermissionPromptProps {
   onDismiss: () => void;
 }
 
-export function NotificationPermissionPrompt({ onDismiss }: NotificationPermissionPromptProps) {
+export function NotificationPermissionPrompt({
+  onDismiss,
+}: NotificationPermissionPromptProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { requestPermission, subscribe, isSupported } = usePushNotifications();
   const { toast } = useToast();
@@ -18,7 +27,8 @@ export function NotificationPermissionPrompt({ onDismiss }: NotificationPermissi
     if (!isSupported) {
       toast({
         title: "Not Supported",
-        description: "Push notifications are not supported on this device/browser.",
+        description:
+          "Push notifications are not supported on this device/browser.",
         variant: "destructive",
       });
       return;
@@ -27,23 +37,25 @@ export function NotificationPermissionPrompt({ onDismiss }: NotificationPermissi
     setIsLoading(true);
     try {
       const permission = await requestPermission();
-      
-      if (permission === 'granted') {
+
+      if (permission === "granted") {
         await subscribe();
         toast({
           title: "Notifications Enabled",
-          description: "You'll now receive push notifications for apartment updates!",
+          description:
+            "You'll now receive push notifications for apartment updates!",
         });
         onDismiss();
       } else {
         toast({
           title: "Permission Denied",
-          description: "You can enable notifications later in your browser settings.",
+          description:
+            "You can enable notifications later in your browser settings.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error enabling notifications:', error);
+      console.error("Error enabling notifications:", error);
       toast({
         title: "Error",
         description: "Failed to enable notifications. Please try again.",
@@ -67,7 +79,10 @@ export function NotificationPermissionPrompt({ onDismiss }: NotificationPermissi
   }
 
   return (
-    <Card className="max-w-md mx-auto mt-4" data-testid="notification-permission-prompt">
+    <Card
+      className="max-w-md mx-auto mt-4"
+      data-testid="notification-permission-prompt"
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -85,7 +100,8 @@ export function NotificationPermissionPrompt({ onDismiss }: NotificationPermissi
           </Button>
         </div>
         <CardDescription>
-          Get notified when new apartments are added, comments are posted, or apartments are favorited by your collaborators.
+          Get notified when new apartments are added, comments are posted, or
+          apartments are favorited by your collaborators.
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">

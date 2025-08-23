@@ -7,7 +7,16 @@ import Sidebar from "@/components/Sidebar";
 import AddApartmentModal from "@/components/AddApartmentModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Plus, User, Users, LogOut, Map, List } from "lucide-react";
+import {
+  MapPin,
+  Search,
+  Plus,
+  User,
+  Users,
+  LogOut,
+  Map,
+  List,
+} from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import {
@@ -24,10 +33,13 @@ export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingApartment, setEditingApartment] = useState<ApartmentWithDetails | null>(null);
-  const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null);
+  const [editingApartment, setEditingApartment] =
+    useState<ApartmentWithDetails | null>(null);
+  const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [mobileView, setMobileView] = useState<'list' | 'map'>('list'); // Default to list on mobile
+  const [mobileView, setMobileView] = useState<"list" | "map">("list"); // Default to list on mobile
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -59,20 +71,22 @@ export default function Home() {
   }
 
   const typedUser = user as UserType;
-  const userInitials = typedUser.firstName && typedUser.lastName 
-    ? `${typedUser.firstName[0]}${typedUser.lastName[0]}` 
-    : typedUser.email?.[0]?.toUpperCase() || "U";
+  const userInitials =
+    typedUser.firstName && typedUser.lastName
+      ? `${typedUser.firstName[0]}${typedUser.lastName[0]}`
+      : typedUser.email?.[0]?.toUpperCase() || "U";
 
-  const displayName = typedUser.firstName && typedUser.lastName 
-    ? `${typedUser.firstName} ${typedUser.lastName[0]}.` 
-    : typedUser.email?.split("@")[0] || "User";
+  const displayName =
+    typedUser.firstName && typedUser.lastName
+      ? `${typedUser.firstName} ${typedUser.lastName[0]}.`
+      : typedUser.email?.split("@")[0] || "User";
 
   // Handle apartment selection with mobile navigation
   const handleApartmentSelect = (id: string | null) => {
     setSelectedApartmentId(id);
     // On mobile, when selecting an apartment, show the list view (detail view)
     if (id && window.innerWidth < 768) {
-      setMobileView('list');
+      setMobileView("list");
     }
   };
 
@@ -80,14 +94,14 @@ export default function Home() {
   const handleMapMarkerClick = (apartmentId: string | null) => {
     setSelectedApartmentId(apartmentId);
     if (apartmentId && window.innerWidth < 768) {
-      setMobileView('list');
+      setMobileView("list");
     }
   };
 
   // Handle back button - should return to map on mobile
   const handleBackToMap = () => {
     if (window.innerWidth < 768) {
-      setMobileView('map');
+      setMobileView("map");
       setSelectedApartmentId(null);
     }
   };
@@ -102,7 +116,7 @@ export default function Home() {
               <MapPin className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-bold text-neutral-900">HouseHunt</h1>
             </div>
-            
+
             <div className="hidden md:flex items-center bg-neutral-100 rounded-lg px-3 py-2 w-80">
               <Search className="h-4 w-4 text-neutral-400 mr-2" />
               <Input
@@ -115,22 +129,22 @@ export default function Home() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             {/* Mobile View Toggle */}
             <div className="md:hidden flex items-center space-x-1">
               <Button
-                variant={mobileView === 'list' ? 'default' : 'outline'}
+                variant={mobileView === "list" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setMobileView('list')}
+                onClick={() => setMobileView("list")}
                 data-testid="button-mobile-list-view"
               >
                 <List className="h-4 w-4" />
               </Button>
               <Button
-                variant={mobileView === 'map' ? 'default' : 'outline'}
+                variant={mobileView === "map" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setMobileView('map')}
+                onClick={() => setMobileView("map")}
                 data-testid="button-mobile-map-view"
               >
                 <Map className="h-4 w-4" />
@@ -138,8 +152,8 @@ export default function Home() {
             </div>
 
             <NotificationBell />
-            
-            <Button 
+
+            <Button
               onClick={() => setIsAddModalOpen(true)}
               className="bg-primary hover:bg-blue-600"
               data-testid="button-add-apartment"
@@ -148,22 +162,26 @@ export default function Home() {
               <span className="hidden sm:inline">Add Apartment</span>
               <span className="sm:hidden">Add</span>
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="flex items-center space-x-2 bg-neutral-100 hover:bg-neutral-200"
                   data-testid="button-user-menu"
                 >
                   <Avatar className="w-6 h-6">
                     <AvatarImage src={typedUser.profileImageUrl || undefined} />
-                    <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+                    <AvatarFallback className="text-xs">
+                      {userInitials}
+                    </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium text-neutral-700">{displayName}</span>
+                  <span className="text-sm font-medium text-neutral-700">
+                    {displayName}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
-              
+
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem data-testid="menu-profile">
                   <User className="h-4 w-4 mr-3" />
@@ -174,8 +192,8 @@ export default function Home() {
                   Collaborators
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => window.location.href = '/api/logout'}
+                <DropdownMenuItem
+                  onClick={() => (window.location.href = "/api/logout")}
                   data-testid="menu-logout"
                 >
                   <LogOut className="h-4 w-4 mr-3" />
@@ -185,7 +203,7 @@ export default function Home() {
             </DropdownMenu>
           </div>
         </div>
-        
+
         {/* Mobile search bar */}
         <div className="md:hidden px-4 pb-3">
           <div className="flex items-center bg-neutral-100 rounded-lg px-3 py-2">
@@ -206,8 +224,10 @@ export default function Home() {
       <div className="flex h-[calc(100vh-64px)]">
         {/* Desktop: Always show sidebar */}
         {/* Mobile: Show sidebar only when mobileView === 'list' */}
-        <div className={`${mobileView === 'list' ? 'w-full' : 'hidden'} md:block md:w-auto`}>
-          <Sidebar 
+        <div
+          className={`${mobileView === "list" ? "w-full" : "hidden"} md:block md:w-auto`}
+        >
+          <Sidebar
             selectedApartmentId={selectedApartmentId}
             onSelectApartment={handleApartmentSelect}
             onEditApartment={setEditingApartment}
@@ -215,21 +235,23 @@ export default function Home() {
             onBackToMap={handleBackToMap}
           />
         </div>
-        
+
         {/* Desktop: Always show map */}
         {/* Mobile: Show map only when mobileView === 'map' */}
-        <div className={`${mobileView === 'map' ? 'w-full' : 'hidden'} md:block md:flex-1`}>
-          <SimpleMap 
+        <div
+          className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1`}
+        >
+          <SimpleMap
             selectedApartmentId={selectedApartmentId}
             onSelectApartment={handleMapMarkerClick}
             onAddApartment={() => setIsAddModalOpen(true)}
-            isVisible={mobileView === 'map' || window.innerWidth >= 768}
+            isVisible={mobileView === "map" || window.innerWidth >= 768}
           />
         </div>
       </div>
 
       {/* Add/Edit Apartment Modal */}
-      <AddApartmentModal 
+      <AddApartmentModal
         isOpen={isAddModalOpen || !!editingApartment}
         onClose={() => {
           setIsAddModalOpen(false);
@@ -237,9 +259,6 @@ export default function Home() {
         }}
         editingApartment={editingApartment}
       />
-      
-      {/* Notification Permission Prompt */}
-      <NotificationPermissionPrompt />
     </div>
   );
 }

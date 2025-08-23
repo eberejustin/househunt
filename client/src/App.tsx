@@ -20,43 +20,43 @@ function Router() {
   const { permission, isSupported } = usePushNotifications();
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
-  
+
   // Initialize WebSocket connection for authenticated users
   useWebSocket();
 
   // Show PWA prompts after user is authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log('PWA State:', { isInstallable, isSupported, permission });
-      
+      console.log("PWA State:", { isInstallable, isSupported, permission });
+
       // Show install prompt after a delay - but also show for debugging
       const installTimer = setTimeout(() => {
-        console.log('Checking install prompt:', { isInstallable });
+        console.log("Checking install prompt:", { isInstallable });
         // For debugging, show install prompt even if not installable on some browsers
-        const shouldShowInstall = isInstallable || (
+        const shouldShowInstall =
+          isInstallable ||
           // Show on desktop Chrome/Edge if not in standalone mode
-          !window.matchMedia('(display-mode: standalone)').matches &&
-          (navigator.userAgent.includes('Chrome') || navigator.userAgent.includes('Edge'))
-        );
-        
+          (!window.matchMedia("(display-mode: standalone)").matches &&
+            (navigator.userAgent.includes("Chrome") ||
+              navigator.userAgent.includes("Edge")));
+
         if (shouldShowInstall) {
           setShowInstallPrompt(true);
         }
       }, 3000);
 
-      // Show notification prompt after install prompt or if install not available
-      const notificationTimer = setTimeout(() => {
-        if (isSupported && permission === 'default') {
-          setShowNotificationPrompt(true);
-        }
-      }, isInstallable ? 8000 : 5000);
-
       return () => {
         clearTimeout(installTimer);
-        clearTimeout(notificationTimer);
+        // clearTimeout(notificationTimer);
       };
     }
   }, [isAuthenticated, isLoading, isInstallable, isSupported, permission]);
+  // useEffect(() => {
+  //     if (isSupported && permission === 'default') {
+  //       setShowNotificationPrompt(true);
+  //     }
+  //   }, isInstallable ? 8000 : 5000);
+  // })
 
   return (
     <>
@@ -70,17 +70,24 @@ function Router() {
         )}
         <Route component={NotFound} />
       </Switch>
-      
+
       {/* PWA Prompts */}
       {showInstallPrompt && (
         <div className="fixed top-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
-          <InstallPrompt onDismiss={() => setShowInstallPrompt(false)} />
+          <InstallPrompt
+            onDismiss={() => {
+              setShowInstallPrompt(false);
+              setShowNotificationPrompt(true);
+            }}
+          />
         </div>
       )}
-      
+
       {showNotificationPrompt && (
         <div className="fixed top-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
-          <NotificationPermissionPrompt onDismiss={() => setShowNotificationPrompt(false)} />
+          <NotificationPermissionPrompt
+            onDismiss={() => setShowNotificationPrompt(false)}
+          />
         </div>
       )}
     </>
