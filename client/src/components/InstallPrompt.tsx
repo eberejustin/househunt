@@ -17,19 +17,27 @@ export function InstallPrompt({ onDismiss }: InstallPromptProps) {
   const handleInstall = async () => {
     setIsInstalling(true);
     try {
-      await installApp();
-      toast({
-        title: "App Installed",
-        description: "HouseHunt has been added to your home screen!",
-      });
+      if (isInstallable) {
+        await installApp();
+        toast({
+          title: "App Installed",
+          description: "HouseHunt has been added to your home screen!",
+        });
+      } else {
+        // Fallback instructions for manual installation
+        toast({
+          title: "Install HouseHunt",
+          description: "Look for 'Add to Home Screen' or 'Install App' in your browser menu.",
+        });
+      }
       onDismiss();
     } catch (error) {
       console.error('Error installing app:', error);
       toast({
-        title: "Installation Failed",
-        description: "Unable to install the app. Please try again.",
-        variant: "destructive",
+        title: "Installation Instructions",
+        description: "Look for 'Add to Home Screen' or 'Install App' in your browser menu.",
       });
+      onDismiss();
     } finally {
       setIsInstalling(false);
     }
@@ -43,9 +51,8 @@ export function InstallPrompt({ onDismiss }: InstallPromptProps) {
     onDismiss();
   };
 
-  if (!isInstallable) {
-    return null;
-  }
+  // Always show the prompt component when it's called
+  // The parent component controls when to show it
 
   return (
     <Card className="max-w-md mx-auto mt-4" data-testid="install-prompt">
@@ -67,6 +74,7 @@ export function InstallPrompt({ onDismiss }: InstallPromptProps) {
         </div>
         <CardDescription>
           Install HouseHunt on your device for quick access and a native app experience.
+          {!isInstallable && " Look for 'Add to Home Screen' in your browser menu."}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">

@@ -27,9 +27,19 @@ function Router() {
   // Show PWA prompts after user is authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      // Show install prompt after a delay
+      console.log('PWA State:', { isInstallable, isSupported, permission });
+      
+      // Show install prompt after a delay - but also show for debugging
       const installTimer = setTimeout(() => {
-        if (isInstallable) {
+        console.log('Checking install prompt:', { isInstallable });
+        // For debugging, show install prompt even if not installable on some browsers
+        const shouldShowInstall = isInstallable || (
+          // Show on desktop Chrome/Edge if not in standalone mode
+          !window.matchMedia('(display-mode: standalone)').matches &&
+          (navigator.userAgent.includes('Chrome') || navigator.userAgent.includes('Edge'))
+        );
+        
+        if (shouldShowInstall) {
           setShowInstallPrompt(true);
         }
       }, 3000);
