@@ -112,9 +112,8 @@ export default function Home() {
       <header className="bg-white shadow-sm border-b border-neutral-200 sticky top-0 z-50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold text-neutral-900">HouseHunt</h1>
+            <div className="flex items-center">
+              <span className="text-2xl">🏠</span>
             </div>
 
             <div className="hidden md:flex items-center bg-neutral-100 rounded-lg px-3 py-2 w-80">
@@ -153,31 +152,15 @@ export default function Home() {
 
             <NotificationBell />
 
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-primary hover:bg-blue-600"
-              data-testid="button-add-apartment"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Add Apartment</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="flex items-center space-x-2 bg-neutral-100 hover:bg-neutral-200"
+                  className="p-0 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center"
                   data-testid="button-user-menu"
                 >
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage src={typedUser.profileImageUrl || undefined} />
-                    <AvatarFallback className="text-xs">
-                      {userInitials}
-                    </AvatarFallback>
-                  </Avatar>
                   <span className="text-sm font-medium text-neutral-700">
-                    {displayName}
+                    {typedUser?.firstName?.[0] || typedUser?.lastName?.[0] || 'U'}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
@@ -249,6 +232,15 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {/* Floating Add Button */}
+      <Button
+        onClick={() => setIsAddModalOpen(true)}
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary hover:bg-blue-600 shadow-lg z-40 p-0 flex items-center justify-center"
+        data-testid="button-floating-add-apartment"
+      >
+        <Plus className="h-6 w-6 text-white" />
+      </Button>
 
       {/* Add/Edit Apartment Modal */}
       <AddApartmentModal
