@@ -116,7 +116,9 @@ export default function Home() {
               <span className="text-2xl md:hidden">🏠</span>
               <div className="hidden md:flex items-center space-x-2">
                 <MapPin className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-bold text-neutral-900">HouseHunt</h1>
+                <h1 className="text-xl font-bold text-neutral-900">
+                  HouseHunt
+                </h1>
               </div>
             </div>
 
@@ -159,7 +161,7 @@ export default function Home() {
             {/* Desktop Add Apartment Button - Hidden on mobile */}
             <Button
               onClick={() => setIsAddModalOpen(true)}
-              className="hidden md:inline-flex bg-primary hover:bg-blue-600"
+              className="md:hidden bg-primary hover:bg-blue-600"
               data-testid="button-add-apartment"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -175,13 +177,17 @@ export default function Home() {
                 >
                   {/* Mobile: Just initial in circle */}
                   <span className="md:hidden text-sm font-medium text-neutral-700">
-                    {typedUser?.firstName?.[0] || typedUser?.lastName?.[0] || 'U'}
+                    {typedUser?.firstName?.[0] ||
+                      typedUser?.lastName?.[0] ||
+                      "U"}
                   </span>
-                  
+
                   {/* Desktop: Full profile with avatar and name */}
                   <div className="hidden md:flex items-center space-x-2">
                     <Avatar className="w-6 h-6">
-                      <AvatarImage src={typedUser.profileImageUrl || undefined} />
+                      <AvatarImage
+                        src={typedUser.profileImageUrl || undefined}
+                      />
                       <AvatarFallback className="text-xs">
                         {userInitials}
                       </AvatarFallback>
