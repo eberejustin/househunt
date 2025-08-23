@@ -1,88 +1,110 @@
-import { useState, useEffect } from 'react';
-import { useToast } from './use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from './useAuth';
+
+interface NotificationPayload {
+  title: string;
+  message: string;
+  type?: string;
+  apartmentId?: string;
+  url?: string;
+}
 
 export function usePushNotifications() {
-  const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const { toast } = useToast();
+  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [isSupported, setIsSupported] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Check if push notifications are supported
-    setIsSupported('serviceWorker' in navigator && 'PushManager' in window);
-    setPermission(Notification.permission);
+    const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    setIsSupported(supported);
+
+    if (supported) {
+      setPermission(Notification.permission);
+    }
   }, []);
 
-  const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      });
-      console.log('Service Worker registered:', registration);
-      return registration;
-    } catch (error) {
-      console.error('Service Worker registration failed:', error);
-      return null;
-    }
-  };
-
-  const requestPermission = async (): Promise<boolean> => {
+  const requestPermission = useCallback(async () => {
     if (!isSupported) {
-      toast({
-        title: "Not Supported",
-        description: "Push notifications are not supported in this browser.",
-        variant: "destructive",
-      });
-      return false;
+      throw new Error('Push notifications are not supported');
     }
 
-    setIsRegistering(true);
-    
     try {
       const permission = await Notification.requestPermission();
       setPermission(permission);
-      
-      if (permission === 'granted') {
-        await registerServiceWorker();
-        toast({
-          title: "Notifications Enabled",
-          description: "You'll now receive real-time notifications for apartment updates.",
-        });
-        return true;
-      } else if (permission === 'denied') {
-        toast({
-          title: "Notifications Blocked",
-          description: "Please enable notifications in your browser settings to receive updates.",
-          variant: "destructive",
-        });
-        return false;
-      } else {
-        toast({
-          title: "Notifications Dismissed",
-          description: "You can enable notifications later in your browser settings.",
-        });
-        return false;
-      }
+      return permission;
     } catch (error) {
       console.error('Error requesting notification permission:', error);
-      toast({
-        title: "Permission Error",
-        description: "Failed to request notification permission.",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsRegistering(false);
+      throw error;
     }
-  };
+  }, [isSupported]);
 
-  const showNotification = async (title: string, options: {
-    message: string;
-    type: string;
-    apartmentId?: string;
-  }) => {
-    if (permission !== 'granted') {
-      console.log('No permission to show notification');
+  const subscribe = useCallback(async () => {
+    if (!isSupported || permission !== 'granted') {
+      throw new Error('Permission not granted for notifications');
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      
+      // VAPID public key - this should be generated and stored securely
+      const vapidPublicKey = 'BEl62iUYgUivxIkv69yViEuiBIa40HI80xmqjNzkONXUmf4ESfGaWiKNXJ0dO4lJ8JRH0XOo_8hH9M6NvL2z6Y8';
+      
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+      });
+
+      setSubscription(subscription);
+
+      // Send subscription to server
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscription,
+          userId: user?.id
+        })
+      });
+
+      return subscription;
+    } catch (error) {
+      console.error('Error subscribing to push notifications:', error);
+      throw error;
+    }
+  }, [isSupported, permission, user?.id]);
+
+  const unsubscribe = useCallback(async () => {
+    if (!subscription) {
+      return;
+    }
+
+    try {
+      await subscription.unsubscribe();
+      setSubscription(null);
+
+      // Remove subscription from server
+      await fetch('/api/push/unsubscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          endpoint: subscription.endpoint,
+          userId: user?.id
+        })
+      });
+    } catch (error) {
+      console.error('Error unsubscribing from push notifications:', error);
+      throw error;
+    }
+  }, [subscription, user?.id]);
+
+  const showNotification = useCallback(async (title: string, options: NotificationPayload) => {
+    if (!isSupported || permission !== 'granted') {
       return;
     }
 
@@ -90,37 +112,51 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.ready;
       await registration.showNotification(title, {
         body: options.message,
-        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 5.16-1 9-5.45 9-11V7l-10-5z"/></svg>',
-        badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>',
-        tag: options.type,
-        data: {
-          apartmentId: options.apartmentId,
-          url: '/'
-        },
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: 'househunt-local',
+        data: options,
+        requireInteraction: false,
         actions: [
           {
             action: 'view',
-            title: 'View Apartment'
-          },
-          {
-            action: 'dismiss',
-            title: 'Dismiss'
+            title: 'View Details',
+            icon: '/icon-192.png'
           }
-        ],
-        requireInteraction: false,
-        vibrate: [200, 100, 200]
+        ]
       });
     } catch (error) {
       console.error('Error showing notification:', error);
     }
-  };
+  }, [isSupported, permission]);
+
+  // Check if we can show notifications
+  const canShow = permission === 'granted' && isSupported;
 
   return {
     isSupported,
     permission,
-    isRegistering,
+    subscription,
+    canShow,
     requestPermission,
-    showNotification,
-    canShow: permission === 'granted'
+    subscribe,
+    unsubscribe,
+    showNotification
   };
+}
+
+// Helper function to convert VAPID key
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }

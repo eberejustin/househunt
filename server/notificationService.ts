@@ -1,5 +1,6 @@
 import { WebSocket } from "ws";
 import { storage } from "./storage";
+import { sendPushToAllUsers } from "./pushService";
 import type { InsertNotification } from "@shared/schema";
 
 // Store active WebSocket connections by user ID
@@ -134,6 +135,15 @@ export async function createAndBroadcastNotification(
 
     await Promise.all(notificationPromises);
     console.log(`Created and sent ${targetUsers.length} notifications for ${type}`);
+    
+    // Also send push notifications
+    await sendPushToAllUsers(actorId, {
+      title,
+      message,
+      type,
+      apartmentId,
+      url: apartmentId ? `/?apartment=${apartmentId}` : '/',
+    });
     
   } catch (error) {
     console.error('Error creating and broadcasting notification:', error);

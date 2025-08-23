@@ -14,6 +14,16 @@ Deleted listings: Use symmetrical circular grey markers instead of teardrop shap
 
 # Recent Changes
 
+- **PWA Conversion (August 2025)**: Successfully converted HouseHunt to a Progressive Web App with full installability and push notifications
+  - Added comprehensive PWA manifest with app icons, shortcuts, and screenshots
+  - Implemented service worker for offline functionality and push notification handling
+  - Created install prompts and notification permission requests with proper UX timing
+  - Integrated web-push library for server-side push notification delivery
+  - Added push subscription database table and API endpoints for subscription management
+  - Enhanced notification system to send both WebSocket and push notifications simultaneously
+  - Fixed modal positioning issues by removing conflicting CSS position relative properties
+  - Added PWA meta tags and icons for proper mobile app installation experience
+
 - Added bathroom and status fields to apartment database schema with dropdown options (August 2025)
 - Implemented "3 BR/2 BA" format display for bedrooms/bathrooms across all views (August 2025)
 - Added status tracking with options: Contacted, Viewed, Applied, Rented, and default "Not started" for null values (August 2025)

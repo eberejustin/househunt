@@ -1,56 +1,251 @@
-// Service Worker for Push Notifications
-self.addEventListener('push', function(event) {
-  if (event.data) {
-    const data = event.data.json();
-    
-    const options = {
-      body: data.message,
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 5.16-1 9-5.45 9-11V7l-10-5z"/></svg>',
-      badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>',
-      tag: data.type,
-      data: {
-        apartmentId: data.apartmentId,
-        url: '/'
-      },
-      actions: [
-        {
-          action: 'view',
-          title: 'View Apartment'
-        },
-        {
-          action: 'dismiss',
-          title: 'Dismiss'
-        }
-      ],
-      requireInteraction: false,
-      vibrate: [200, 100, 200]
-    };
+// Service Worker for HouseHunt PWA
+const CACHE_NAME = 'househunt-v1';
+const STATIC_CACHE_URLS = [
+  '/',
+  '/static/js/bundle.js',
+  '/static/css/main.css',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
+];
 
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
-  }
+// Install event - cache static assets
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Caching static assets');
+        return cache.addAll(STATIC_CACHE_URLS.map(url => new Request(url, { cache: 'reload' })));
+      })
+      .catch((error) => {
+        console.error('Failed to cache static assets:', error);
+      })
+  );
+  self.skipWaiting();
 });
 
-self.addEventListener('notificationclick', function(event) {
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch event - serve from cache with network fallback
+self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        // Return cached version if available
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Otherwise fetch from network
+        return fetch(event.request)
+          .then((response) => {
+            // Don't cache non-successful responses
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone response for caching
+            const responseToCache = response.clone();
+
+            // Cache the response for future use
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          })
+          .catch(() => {
+            // Return offline page for navigation requests
+            if (event.request.mode === 'navigate') {
+              return caches.match('/');
+            }
+          });
+      })
+  );
+});
+
+// Push event - handle push notifications
+self.addEventListener('push', (event) => {
+  console.log('Push notification received:', event);
+  
+  const options = {
+    body: 'You have a new notification from HouseHunt',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    tag: 'househunt-notification',
+    requireInteraction: false,
+    actions: [
+      {
+        action: 'view',
+        title: 'View Details',
+        icon: '/icon-192.png'
+      },
+      {
+        action: 'dismiss',
+        title: 'Dismiss',
+        icon: '/icon-192.png'
+      }
+    ]
+  };
+
+  let notificationData = {
+    title: 'HouseHunt',
+    ...options
+  };
+
+  // Parse push data if available
+  if (event.data) {
+    try {
+      const pushData = event.data.json();
+      notificationData = {
+        title: pushData.title || 'HouseHunt',
+        body: pushData.message || pushData.body,
+        icon: pushData.icon || '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: pushData.tag || 'househunt-notification',
+        data: pushData,
+        requireInteraction: pushData.requireInteraction || false,
+        actions: pushData.actions || options.actions
+      };
+    } catch (error) {
+      console.error('Error parsing push data:', error);
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, notificationData)
+  );
+});
+
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+  console.log('Notification clicked:', event);
+  
   event.notification.close();
 
-  if (event.action === 'view') {
-    event.waitUntil(
-      clients.openWindow(event.notification.data.url)
-    );
-  } else if (event.action === 'dismiss') {
-    // Just close the notification
+  const action = event.action;
+  const notificationData = event.notification.data;
+
+  if (action === 'dismiss') {
     return;
-  } else {
-    // Default click action
+  }
+
+  // Determine URL to open
+  let urlToOpen = '/';
+  
+  if (action === 'view' && notificationData && notificationData.apartmentId) {
+    urlToOpen = `/?apartment=${notificationData.apartmentId}`;
+  } else if (notificationData && notificationData.url) {
+    urlToOpen = notificationData.url;
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.focus();
+            client.postMessage({
+              type: 'notification-click',
+              data: notificationData,
+              action: action
+            });
+            return;
+          }
+        }
+
+        // Open new window if app is not open
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
+
+// Background sync event (for offline functionality)
+self.addEventListener('sync', (event) => {
+  console.log('Background sync triggered:', event.tag);
+  
+  if (event.tag === 'apartment-sync') {
     event.waitUntil(
-      clients.openWindow(event.notification.data.url)
+      // Handle offline apartment submissions
+      syncOfflineData()
     );
   }
 });
 
-self.addEventListener('notificationclose', function(event) {
-  // Track notification dismissal if needed
-  console.log('Notification closed:', event.notification.tag);
+// Sync offline data when connection is restored
+async function syncOfflineData() {
+  try {
+    // Get offline data from IndexedDB or localStorage
+    const offlineData = await getOfflineData();
+    
+    if (offlineData && offlineData.length > 0) {
+      for (const item of offlineData) {
+        try {
+          // Attempt to sync each item
+          await fetch(item.url, {
+            method: item.method,
+            headers: item.headers,
+            body: item.body
+          });
+          
+          // Remove successfully synced item
+          await removeOfflineItem(item.id);
+        } catch (error) {
+          console.error('Failed to sync item:', error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Background sync failed:', error);
+  }
+}
+
+// Helper functions for offline data management
+async function getOfflineData() {
+  // This would typically use IndexedDB
+  // For now, return empty array
+  return [];
+}
+
+async function removeOfflineItem(id) {
+  // Remove item from offline storage
+  console.log('Removing offline item:', id);
+}
+
+// Handle messages from main app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

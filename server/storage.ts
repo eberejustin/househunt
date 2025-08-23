@@ -6,6 +6,7 @@ import {
   labels,
   apartmentLabels,
   notifications,
+  pushSubscriptions,
   type User,
   type UpsertUser,
   type Apartment,
@@ -63,6 +64,11 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: string, userId: string): Promise<void>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
+  
+  // Push notification operations
+  savePushSubscription(userId: string, subscription: any): Promise<void>;
+  removePushSubscription(endpoint: string): Promise<void>;
+  getUserPushSubscriptions(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -467,6 +473,46 @@ export class DatabaseStorage implements IStorage {
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.userId, userId));
+  }
+
+  async savePushSubscription(userId: string, subscription: any): Promise<void> {
+    await db
+      .insert(pushSubscriptions)
+      .values({
+        userId,
+        endpoint: subscription.endpoint,
+        p256dhKey: subscription.keys.p256dh,
+        authKey: subscription.keys.auth,
+      })
+      .onConflictDoUpdate({
+        target: pushSubscriptions.endpoint,
+        set: {
+          userId,
+          p256dhKey: subscription.keys.p256dh,
+          authKey: subscription.keys.auth,
+        },
+      });
+  }
+
+  async removePushSubscription(endpoint: string): Promise<void> {
+    await db
+      .delete(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+
+  async getUserPushSubscriptions(userId: string): Promise<any[]> {
+    const subs = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.userId, userId));
+
+    return subs.map(sub => ({
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: sub.p256dhKey,
+        auth: sub.authKey,
+      },
+    }));
   }
 }
 
