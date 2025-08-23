@@ -389,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (data.type === 'authenticate' && data.userId) {
           userId = data.userId;
-          addUserConnection(userId, ws);
+          addUserConnection(userId!, ws);
           ws.send(JSON.stringify({ type: 'authenticated', userId }));
         }
       } catch (error) {

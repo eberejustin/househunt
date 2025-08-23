@@ -88,10 +88,16 @@ export async function createAndBroadcastNotification(
   excludeActorFromNotification = true
 ) {
   try {
-    // Get all users except the actor to notify them
-    const targetUsers = Array.from(userConnections.keys()).filter(userId => 
-      excludeActorFromNotification ? userId !== actorId : true
-    );
+    console.log(`Creating notification: type=${type}, actorId=${actorId}, apartmentId=${apartmentId}`);
+    console.log(`Active connections: ${Array.from(userConnections.keys()).join(', ')}`);
+    
+    // Get all users to create notifications for (always create DB notifications for all other users)
+    const allUsers = await storage.getAllUsers();
+    const targetUsers = allUsers
+      .filter(user => excludeActorFromNotification ? user.id !== actorId : true)
+      .map(user => user.id);
+    
+    console.log(`Target users for notifications: ${targetUsers.join(', ')}`);
 
     if (targetUsers.length === 0) {
       console.log('No users to notify');
@@ -111,8 +117,9 @@ export async function createAndBroadcastNotification(
       };
 
       const notification = await storage.createNotification(notificationData);
+      console.log(`Created notification ${notification.id} for user ${userId}`);
       
-      // Send real-time notification via WebSocket
+      // Send real-time notification via WebSocket (only if user is connected)
       await sendNotificationToUser(userId, {
         id: notification.id,
         type: notification.type,
