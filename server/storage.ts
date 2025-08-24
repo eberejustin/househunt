@@ -462,17 +462,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markNotificationAsRead(id: string, userId: string): Promise<void> {
-    await db
+    console.log(`[DB] Marking notification ${id} as read for user ${userId}`);
+    const result = await db
       .update(notifications)
       .set({ isRead: true })
       .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+    console.log(`[DB] Update result:`, result);
   }
 
   async markAllNotificationsAsRead(userId: string): Promise<void> {
-    await db
+    console.log(`[DB] Marking all notifications as read for user ${userId}`);
+    const result = await db
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.userId, userId));
+    console.log(`[DB] Update all result:`, result);
   }
 
   async savePushSubscription(userId: string, subscription: any): Promise<void> {

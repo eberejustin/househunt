@@ -27,7 +27,7 @@ function Router() {
   // Check localStorage for previous responses
   const hasInstallBeenDismissed = () => {
     try {
-      return localStorage.getItem('househunt-install-dismissed') === 'true';
+      return localStorage.getItem("househunt-install-dismissed") === "true";
     } catch {
       return false;
     }
@@ -35,7 +35,9 @@ function Router() {
 
   const hasNotificationBeenDismissed = () => {
     try {
-      return localStorage.getItem('househunt-notification-dismissed') === 'true';
+      return (
+        localStorage.getItem("househunt-notification-dismissed") === "true"
+      );
     } catch {
       return false;
     }
@@ -43,7 +45,7 @@ function Router() {
 
   const setInstallDismissed = (dismissed: boolean) => {
     try {
-      localStorage.setItem('househunt-install-dismissed', dismissed.toString());
+      localStorage.setItem("househunt-install-dismissed", dismissed.toString());
     } catch {
       // Ignore localStorage errors
     }
@@ -51,7 +53,10 @@ function Router() {
 
   const setNotificationDismissed = (dismissed: boolean) => {
     try {
-      localStorage.setItem('househunt-notification-dismissed', dismissed.toString());
+      localStorage.setItem(
+        "househunt-notification-dismissed",
+        dismissed.toString(),
+      );
     } catch {
       // Ignore localStorage errors
     }
@@ -64,12 +69,15 @@ function Router() {
 
       // Show install prompt after a delay - but only if not previously dismissed
       const installTimer = setTimeout(() => {
-        console.log("Checking install prompt:", { isInstallable, dismissed: hasInstallBeenDismissed() });
+        console.log("Checking install prompt:", {
+          isInstallable,
+          dismissed: hasInstallBeenDismissed(),
+        });
         // Don't show if previously dismissed
         if (hasInstallBeenDismissed()) {
           return;
         }
-        
+
         // Show install prompt for eligible browsers
         const shouldShowInstall =
           isInstallable ||
@@ -84,19 +92,19 @@ function Router() {
       }, 3000);
 
       // Show notification prompt after install prompt delay - but only if not previously dismissed
-      const notificationTimer = setTimeout(() => {
-        if (hasNotificationBeenDismissed()) {
-          return;
-        }
-        
-        if (isSupported && permission === 'default') {
-          setShowNotificationPrompt(true);
-        }
-      }, 8000);
+      // const notificationTimer = setTimeout(() => {
+      //   if (hasNotificationBeenDismissed()) {
+      //     return;
+      //   }
+
+      //   if (isSupported && permission === 'default') {
+      //     setShowNotificationPrompt(true);
+      //   }
+      // }, 8000);
 
       return () => {
         clearTimeout(installTimer);
-        clearTimeout(notificationTimer);
+        // clearTimeout(notificationTimer);
       };
     }
   }, [isAuthenticated, isLoading, isInstallable, isSupported, permission]);

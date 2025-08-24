@@ -353,7 +353,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const { id } = req.params;
+      console.log(`[PATCH] Marking notification ${id} as read for user ${userId}`);
       await storage.markNotificationAsRead(id, userId);
+      console.log(`[PATCH] Successfully marked notification ${id} as read`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -364,7 +366,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/notifications/read-all', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log(`[PATCH] Marking all notifications as read for user ${userId}`);
       await storage.markAllNotificationsAsRead(userId);
+      console.log(`[PATCH] Successfully marked all notifications as read for user ${userId}`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
