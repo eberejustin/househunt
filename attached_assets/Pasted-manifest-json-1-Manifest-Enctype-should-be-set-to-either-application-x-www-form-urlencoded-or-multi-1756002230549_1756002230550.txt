@@ -1,0 +1,229 @@
+manifest.json:1 Manifest: Enctype should be set to either application/x-www-form-urlencoded or multipart/form-data. It currently defaults to application/x-www-form-urlencoded
+ WebSocket connection to 'wss://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/?token=it2qQn3bkwA8' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) 
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+ SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/', …}
+b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+ Apartments query state changed: {isLoading: true, hasApartments: false, apartmentsLength: 0, apartmentsData: undefined}
+ Marker update effect triggered {isMapReady: false, hasApartments: false}
+ Waiting for map or apartments: {mapReady: false, apartments: false}
+ PWA State: {isInstallable: true, isSupported: true, permission: 'granted'}
+ Map useEffect triggered {mapRefCurrent: false, mapInstanceRefCurrent: false}
+ No mapRef.current available, retrying...
+ Map useEffect triggered {mapRefCurrent: false, mapInstanceRefCurrent: false}
+ No mapRef.current available, retrying...
+ WebSocket connected
+SimpleMap.tsx:321 Marker update effect triggered {isMapReady: false, hasApartments: false}
+SimpleMap.tsx:330 Waiting for map or apartments: {mapReady: false, apartments: false}
+useWebSocket.ts:44 WebSocket authenticated for user: 45985020
+SimpleMap.tsx:223 Map useEffect triggered {mapRefCurrent: false, mapInstanceRefCurrent: false}
+SimpleMap.tsx:229 No mapRef.current available, retrying...
+SimpleMap.tsx:223 Map useEffect triggered {mapRefCurrent: false, mapInstanceRefCurrent: false}
+SimpleMap.tsx:229 No mapRef.current available, retrying...
+SimpleMap.tsx:223 Map useEffect triggered {mapRefCurrent: false, mapInstanceRefCurrent: false}
+SimpleMap.tsx:229 No mapRef.current available, retrying...
+SimpleMap.tsx:223 Map useEffect triggered {mapRefCurrent: false, mapInstanceRefCurrent: false}
+SimpleMap.tsx:229 No mapRef.current available, retrying...
+SimpleMap.tsx:54 Apartments query state changed: {isLoading: false, hasApartments: true, apartmentsLength: 11, apartmentsData: Array(11)}
+SimpleMap.tsx:321 Marker update effect triggered {isMapReady: false, hasApartments: true}
+SimpleMap.tsx:330 Waiting for map or apartments: {mapReady: false, apartments: true}
+SimpleMap.tsx:223 Map useEffect triggered {mapRefCurrent: true, mapInstanceRefCurrent: false}
+SimpleMap.tsx:240 Initializing map...
+SimpleMap.tsx:241 Map container dimensions: {width: 622, height: 759, display: 'block'}
+SimpleMap.tsx:255 Map created, adding tile layer...
+SimpleMap.tsx:270 Tile layer added
+SimpleMap.tsx:268 Tiles loaded
+SimpleMap.tsx:278 Map size invalidated
+SimpleMap.tsx:282 Map is ready, state updated
+SimpleMap.tsx:321 Marker update effect triggered {isMapReady: true, hasApartments: true}
+SimpleMap.tsx:327 Both map and apartments ready, adding markers...
+SimpleMap.tsx:80 addApartmentMarkers called with: {mapAvailable: true, apartmentsAvailable: true, apartmentsLength: 11, apartmentsType: 'object'}
+SimpleMap.tsx:96 Adding apartment markers...
+SimpleMap.tsx:105 Processing apartments array: (11) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+SimpleMap.tsx:108 Adding marker for apartment: {id: 'f7fdd083-e691-4c7f-807a-15bfef77dbff', label: '1499 Bedford Avenue 3i', address: '1499, Bedford Avenue, Brooklyn, Kings County, New York, 11216, United States', latitude: 40.67197, longitude: -73.95449, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.67197 -73.95449
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: '45a1e3dd-3cba-4a1c-b7c9-e9d0b1af2137', label: '487 Park Place', address: '487, Park Place, Prospect Heights, Brooklyn, Kings County, New York, 11238, United States', latitude: 40.67537, longitude: -73.96163, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.67537 -73.96163
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: 'a464ee71-0dc5-4a18-9c3c-762ea922f527', label: '1496 Prospect Place', address: '1496, Prospect Place, Brownsville, Brooklyn, Kings County, New York, 11213, United States', latitude: 40.67279, longitude: -73.92689, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.67279 -73.92689
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: '4f6e3305-64e6-49c3-a53b-fc62257be4d8', label: '386 5th Avenue #2', address: '386, 5th Avenue, Park Slope, Brooklyn, Kings County, New York, 11215, United States', latitude: 40.67099, longitude: -73.98506, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.67099 -73.98506
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: '36ac409f-8eab-4162-a061-ad7822dca8ab', label: '169 Malcolm X Boulevard', address: '169, Malcolm X Boulevard, Brooklyn, Kings County, New York, 11221, United States', latitude: 40.687458, longitude: -73.929756, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.687458 -73.929756
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: 'd9cce8b1-843b-40d5-8854-a85e7a11aaa3', label: '755 Sterling Place', address: '755, Sterling Place, Brooklyn, Kings County, New York, 11216, United States', latitude: 40.672897, longitude: -73.953575, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.672897 -73.953575
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: 'a1427df5-efe8-4c90-b015-d759d28ff375', label: '137 Prospect Avenue', address: '137, Prospect Avenue, South Slope, Brooklyn, Kings County, New York, 11215, United States', latitude: 40.6665, longitude: -73.99421, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.6665 -73.99421
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: 'cf71b8cc-9b63-45d8-9d1a-963c9bc8c743', label: '474 7th Avenue #1', address: '474, 7th Avenue, Park Slope, Brooklyn, Kings County, New York, 11215, United States', latitude: 40.662426, longitude: -73.98557, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.662426 -73.98557
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: 'e3b056bc-59c9-4dad-a31c-ad2cc4fbc33b', label: '302 Macon Street #1', address: '302, Macon Street, Bedford-Stuyvesant, Brooklyn, Kings County, New York, 11216, United States', latitude: 40.682156, longitude: -73.9387, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.682156 -73.9387
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: '162b447e-549a-4288-a663-e1c70192faff', label: '1087 herkimer street #1', address: '1087 herkimer street', latitude: 40.67807, longitude: -73.917435, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.67807 -73.917435
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:108 Adding marker for apartment: {id: '5756e354-1c4a-40f4-8d6f-9e2d743dfbd1', label: '1024 Gates Ave #6I', address: '1024 Gates Ave, brooklyn', latitude: 40.689323, longitude: -73.922585, …}
+SimpleMap.tsx:109 Apartment coordinates: 40.689323 -73.922585
+SimpleMap.tsx:117 Creating marker...
+SimpleMap.tsx:149 Adding marker to map...
+SimpleMap.tsx:151 Marker added successfully
+SimpleMap.tsx:267 Tiles loading...
+SimpleMap.tsx:268 Tiles loaded
+App.tsx:72 Checking install prompt: {isInstallable: true, dismissed: true}
+useNotifications.ts:17 Marking notification as read: 482a6930-3c56-47fa-b909-4b4f0739cdbc
+useNotifications.ts:34 Error marking notification as read: TypeError: Failed to execute 'fetch' on 'Window': '/api/notifications/482a6930-3c56-47fa-b909-4b4f0739cdbc/read' is not a valid HTTP method.
+    at apiRequest (queryClient.ts:15:21)
+    at Object.mutationFn (useNotifications.ts:18:30)
+    at Object.fn (@tanstack_react-query.js?v=ee37b10e:1189:29)
+    at run (@tanstack_react-query.js?v=ee37b10e:494:49)
+    at Object.start (@tanstack_react-query.js?v=ee37b10e:536:9)
+    at _a6.execute (@tanstack_react-query.js?v=ee37b10e:1225:56)
+overrideMethod @ hook.js:608
+onError @ useNotifications.ts:34
+execute @ @tanstack_react-query.js?v=ee37b10e:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=ee37b10e:2630
+(anonymous) @ @tanstack_react-query.js?v=ee37b10e:3295
+handleMarkAsRead @ NotificationBell.tsx:25
+onClick @ NotificationBell.tsx:117
+callCallback2 @ chunk-RPCDYKBN.js?v=ee37b10e:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=ee37b10e:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=ee37b10e:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=ee37b10e:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=ee37b10e:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=ee37b10e:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=ee37b10e:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=ee37b10e:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=ee37b10e:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=ee37b10e:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=ee37b10e:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=ee37b10e:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=ee37b10e:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5449
+useNotifications.ts:17 Marking notification as read: 0c27362e-bd7c-489a-9606-006bfe2f3079
+useNotifications.ts:34 Error marking notification as read: TypeError: Failed to execute 'fetch' on 'Window': '/api/notifications/0c27362e-bd7c-489a-9606-006bfe2f3079/read' is not a valid HTTP method.
+    at apiRequest (queryClient.ts:15:21)
+    at Object.mutationFn (useNotifications.ts:18:30)
+    at Object.fn (@tanstack_react-query.js?v=ee37b10e:1189:29)
+    at run (@tanstack_react-query.js?v=ee37b10e:494:49)
+    at Object.start (@tanstack_react-query.js?v=ee37b10e:536:9)
+    at _a6.execute (@tanstack_react-query.js?v=ee37b10e:1225:56)
+overrideMethod @ hook.js:608
+onError @ useNotifications.ts:34
+execute @ @tanstack_react-query.js?v=ee37b10e:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=ee37b10e:2630
+(anonymous) @ @tanstack_react-query.js?v=ee37b10e:3295
+handleMarkAsRead @ NotificationBell.tsx:25
+onClick @ NotificationBell.tsx:117
+callCallback2 @ chunk-RPCDYKBN.js?v=ee37b10e:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=ee37b10e:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=ee37b10e:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=ee37b10e:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=ee37b10e:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=ee37b10e:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=ee37b10e:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=ee37b10e:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=ee37b10e:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=ee37b10e:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=ee37b10e:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=ee37b10e:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=ee37b10e:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5449
+useNotifications.ts:17 Marking notification as read: 0c27362e-bd7c-489a-9606-006bfe2f3079
+useNotifications.ts:34 Error marking notification as read: TypeError: Failed to execute 'fetch' on 'Window': '/api/notifications/0c27362e-bd7c-489a-9606-006bfe2f3079/read' is not a valid HTTP method.
+    at apiRequest (queryClient.ts:15:21)
+    at Object.mutationFn (useNotifications.ts:18:30)
+    at Object.fn (@tanstack_react-query.js?v=ee37b10e:1189:29)
+    at run (@tanstack_react-query.js?v=ee37b10e:494:49)
+    at Object.start (@tanstack_react-query.js?v=ee37b10e:536:9)
+    at _a6.execute (@tanstack_react-query.js?v=ee37b10e:1225:56)
+overrideMethod @ hook.js:608
+onError @ useNotifications.ts:34
+execute @ @tanstack_react-query.js?v=ee37b10e:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=ee37b10e:2630
+(anonymous) @ @tanstack_react-query.js?v=ee37b10e:3295
+handleMarkAsRead @ NotificationBell.tsx:25
+onClick @ NotificationBell.tsx:117
+callCallback2 @ chunk-RPCDYKBN.js?v=ee37b10e:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=ee37b10e:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=ee37b10e:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=ee37b10e:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=ee37b10e:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=ee37b10e:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=ee37b10e:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=ee37b10e:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=ee37b10e:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=ee37b10e:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=ee37b10e:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=ee37b10e:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=ee37b10e:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5449
+useNotifications.ts:17 Marking notification as read: 0c27362e-bd7c-489a-9606-006bfe2f3079
+useNotifications.ts:34 Error marking notification as read: TypeError: Failed to execute 'fetch' on 'Window': '/api/notifications/0c27362e-bd7c-489a-9606-006bfe2f3079/read' is not a valid HTTP method.
+    at apiRequest (queryClient.ts:15:21)
+    at Object.mutationFn (useNotifications.ts:18:30)
+    at Object.fn (@tanstack_react-query.js?v=ee37b10e:1189:29)
+    at run (@tanstack_react-query.js?v=ee37b10e:494:49)
+    at Object.start (@tanstack_react-query.js?v=ee37b10e:536:9)
+    at _a6.execute (@tanstack_react-query.js?v=ee37b10e:1225:56)
+overrideMethod @ hook.js:608
+onError @ useNotifications.ts:34
+execute @ @tanstack_react-query.js?v=ee37b10e:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=ee37b10e:2630
+(anonymous) @ @tanstack_react-query.js?v=ee37b10e:3295
+handleMarkAsRead @ NotificationBell.tsx:25
+onClick @ NotificationBell.tsx:117
+callCallback2 @ chunk-RPCDYKBN.js?v=ee37b10e:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=ee37b10e:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=ee37b10e:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=ee37b10e:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=ee37b10e:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=ee37b10e:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=ee37b10e:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=ee37b10e:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=ee37b10e:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=ee37b10e:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=ee37b10e:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=ee37b10e:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=ee37b10e:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=ee37b10e:5449
