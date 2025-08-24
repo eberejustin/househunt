@@ -45,6 +45,7 @@ export function NotificationPermissionPrompt({
           description:
             "You'll now receive push notifications for apartment updates!",
         });
+        // Don't mark as dismissed when enabled - user made a positive choice
         onDismiss();
       } else {
         toast({
@@ -53,6 +54,8 @@ export function NotificationPermissionPrompt({
             "You can enable notifications later in your browser settings.",
           variant: "destructive",
         });
+        // User denied permission, so dismiss and remember this choice
+        onDismiss();
       }
     } catch (error) {
       console.error("Error enabling notifications:", error);

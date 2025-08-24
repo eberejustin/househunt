@@ -24,15 +24,53 @@ function Router() {
   // Initialize WebSocket connection for authenticated users
   useWebSocket();
 
+  // Check localStorage for previous responses
+  const hasInstallBeenDismissed = () => {
+    try {
+      return localStorage.getItem('househunt-install-dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  };
+
+  const hasNotificationBeenDismissed = () => {
+    try {
+      return localStorage.getItem('househunt-notification-dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  };
+
+  const setInstallDismissed = (dismissed: boolean) => {
+    try {
+      localStorage.setItem('househunt-install-dismissed', dismissed.toString());
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
+
+  const setNotificationDismissed = (dismissed: boolean) => {
+    try {
+      localStorage.setItem('househunt-notification-dismissed', dismissed.toString());
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
+
   // Show PWA prompts after user is authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       console.log("PWA State:", { isInstallable, isSupported, permission });
 
-      // Show install prompt after a delay - but also show for debugging
+      // Show install prompt after a delay - but only if not previously dismissed
       const installTimer = setTimeout(() => {
-        console.log("Checking install prompt:", { isInstallable });
-        // For debugging, show install prompt even if not installable on some browsers
+        console.log("Checking install prompt:", { isInstallable, dismissed: hasInstallBeenDismissed() });
+        // Don't show if previously dismissed
+        if (hasInstallBeenDismissed()) {
+          return;
+        }
+        
+        // Show install prompt for eligible browsers
         const shouldShowInstall =
           isInstallable ||
           // Show on desktop Chrome/Edge if not in standalone mode
@@ -45,9 +83,20 @@ function Router() {
         }
       }, 3000);
 
+      // Show notification prompt after install prompt delay - but only if not previously dismissed
+      const notificationTimer = setTimeout(() => {
+        if (hasNotificationBeenDismissed()) {
+          return;
+        }
+        
+        if (isSupported && permission === 'default') {
+          setShowNotificationPrompt(true);
+        }
+      }, 8000);
+
       return () => {
         clearTimeout(installTimer);
-        // clearTimeout(notificationTimer);
+        clearTimeout(notificationTimer);
       };
     }
   }, [isAuthenticated, isLoading, isInstallable, isSupported, permission]);
@@ -77,7 +126,11 @@ function Router() {
           <InstallPrompt
             onDismiss={() => {
               setShowInstallPrompt(false);
-              setShowNotificationPrompt(true);
+              setInstallDismissed(true);
+              // Show notification prompt after install is dismissed
+              if (!hasNotificationBeenDismissed()) {
+                setTimeout(() => setShowNotificationPrompt(true), 2000);
+              }
             }}
           />
         </div>
@@ -86,7 +139,10 @@ function Router() {
       {showNotificationPrompt && (
         <div className="fixed top-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
           <NotificationPermissionPrompt
-            onDismiss={() => setShowNotificationPrompt(false)}
+            onDismiss={() => {
+              setShowNotificationPrompt(false);
+              setNotificationDismissed(true);
+            }}
           />
         </div>
       )}
