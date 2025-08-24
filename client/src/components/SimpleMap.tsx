@@ -51,11 +51,12 @@ export default function SimpleMap({
 
   // Debug apartments loading
   useEffect(() => {
-    console.log('Apartments query state changed:', { 
-      isLoading, 
-      hasApartments: !!apartments, 
-      apartmentsLength: apartments && Array.isArray(apartments) ? apartments.length : 0,
-      apartmentsData: apartments 
+    console.log("Apartments query state changed:", {
+      isLoading,
+      hasApartments: !!apartments,
+      apartmentsLength:
+        apartments && Array.isArray(apartments) ? apartments.length : 0,
+      apartmentsData: apartments,
     });
   }, [apartments, isLoading]);
 
@@ -76,13 +77,14 @@ export default function SimpleMap({
   // Function to add apartment markers with simple default style
   const addApartmentMarkers = useCallback(() => {
     const map = mapInstanceRef.current;
-    console.log('addApartmentMarkers called with:', { 
-      mapAvailable: !!map, 
-      apartmentsAvailable: !!apartments, 
-      apartmentsLength: apartments && Array.isArray(apartments) ? apartments.length : 0,
-      apartmentsType: typeof apartments
+    console.log("addApartmentMarkers called with:", {
+      mapAvailable: !!map,
+      apartmentsAvailable: !!apartments,
+      apartmentsLength:
+        apartments && Array.isArray(apartments) ? apartments.length : 0,
+      apartmentsType: typeof apartments,
     });
-    
+
     if (!map || !apartments) {
       console.log("Cannot add markers - map or apartments not available:", {
         map: !!map,
@@ -114,27 +116,31 @@ export default function SimpleMap({
         // Create marker with custom icon for deleted apartments
         console.log("Creating marker...");
         let marker;
-        
+
         if (apartment.isDeleted) {
           // Grey circular marker for deleted apartments
           const greyIcon = L.divIcon({
-            className: 'custom-marker-grey',
+            className: "custom-marker-grey",
             html: '<div style="background-color: #9CA3AF; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><div style="width: 8px; height: 8px; background-color: #6B7280; border-radius: 50%;"></div></div>',
             iconSize: [20, 20],
             iconAnchor: [10, 10],
             popupAnchor: [0, -10],
           });
-          marker = L.marker([apartment.latitude, apartment.longitude], { icon: greyIcon });
+          marker = L.marker([apartment.latitude, apartment.longitude], {
+            icon: greyIcon,
+          });
         } else if (apartment.isFavorited) {
           // Red heart icon for favorited apartments
           const heartIcon = L.divIcon({
-            className: 'custom-marker-heart',
+            className: "custom-marker-heart",
             html: '<div style="font-size: 24px; color: #ef4444; text-shadow: 0 0 3px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; width: 25px; height: 25px;">❤️</div>',
             iconSize: [25, 25],
             iconAnchor: [12, 12],
             popupAnchor: [0, -12],
           });
-          marker = L.marker([apartment.latitude, apartment.longitude], { icon: heartIcon });
+          marker = L.marker([apartment.latitude, apartment.longitude], {
+            icon: heartIcon,
+          });
         } else {
           // Default blue marker for active apartments
           marker = L.marker([apartment.latitude, apartment.longitude]);
@@ -145,37 +151,46 @@ export default function SimpleMap({
         console.log("Marker added successfully");
 
         const popupContent = `
-          <div style="padding: 12px; min-width: 200px; ${apartment.isDeleted ? 'opacity: 0.7; background-color: #f9fafb;' : ''}">
+          <div style="padding: 12px; min-width: 200px; ${apartment.isDeleted ? "opacity: 0.7; background-color: #f9fafb;" : ""}">
             <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
-              <h3 style="font-weight: 600; font-size: 16px; color: ${apartment.isDeleted ? '#9CA3AF' : '#374151'}; margin: 0; ${apartment.isDeleted ? 'text-decoration: line-through;' : ''}">${apartment.label}</h3>
+              <h3 style="font-weight: 600; font-size: 16px; color: ${apartment.isDeleted ? "#9CA3AF" : "#374151"}; margin: 0; ${apartment.isDeleted ? "text-decoration: line-through;" : ""}">${apartment.label}</h3>
               ${apartment.isFavorited ? '<span style="color: #ef4444; font-size: 18px;">❤️</span>' : ""}
               ${apartment.isDeleted ? '<span style="color: #9CA3AF; font-size: 14px; margin-left: 8px;">DELETED</span>' : ""}
             </div>
-            <p style="font-size: 14px; color: ${apartment.isDeleted ? '#9CA3AF' : '#6b7280'}; margin: 0 0 12px 0; ${apartment.isDeleted ? 'text-decoration: line-through;' : ''}">${apartment.address}</p>
+            <p style="font-size: 14px; color: ${apartment.isDeleted ? "#9CA3AF" : "#6b7280"}; margin: 0 0 12px 0; ${apartment.isDeleted ? "text-decoration: line-through;" : ""}">${apartment.address}</p>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 8px;">
-              <span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#059669'}; font-weight: 500;">
+              <span style="color: ${apartment.isDeleted ? "#9CA3AF" : "#059669"}; font-weight: 500;">
                 ${apartment.rent ? `$${apartment.rent}/mo` : "Rent TBD"}
               </span>
-              <span style="color: ${apartment.isDeleted ? '#9CA3AF' : '#2563eb'}; font-weight: 500;">
-                ${apartment.bedrooms ? 
-                  `${apartment.bedrooms}${apartment.bathrooms ? `/${apartment.bathrooms} BA` : ''}` : 
-                  "Bedrooms TBD"
+              <span style="color: ${apartment.isDeleted ? "#9CA3AF" : "#2563eb"}; font-weight: 500;">
+                ${
+                  apartment.bedrooms
+                    ? `${apartment.bedrooms}${apartment.bathrooms ? `/${apartment.bathrooms} BA` : ""}`
+                    : "Bedrooms TBD"
                 }
               </span>
             </div>
             <div style="text-align: center; margin-bottom: 8px;">
-              <span style="background-color: ${apartment.isDeleted ? '#9CA3AF' : '#dbeafe'}; color: ${apartment.isDeleted ? '#6b7280' : '#1e40af'}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">${apartment.status || 'Not started'}</span>
+              <span style="background-color: ${apartment.isDeleted ? "#9CA3AF" : "#dbeafe"}; color: ${apartment.isDeleted ? "#6b7280" : "#1e40af"}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">${apartment.status || "Not started"}</span>
             </div>
-            ${apartment.labels && apartment.labels.length > 0 ? `
+            ${
+              apartment.labels && apartment.labels.length > 0
+                ? `
               <div style="margin: 8px 0;">
-                ${apartment.labels.slice(0, 3).map(label => 
-                  `<span style="display: inline-block; background-color: ${apartment.isDeleted ? '#9CA3AF' : label.color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px; margin-bottom: 2px; ${apartment.isDeleted ? 'text-decoration: line-through;' : ''}">${label.name}</span>`
-                ).join('')}
-                ${apartment.labels.length > 3 ? `<span style="font-size: 11px; color: #6b7280;">+${apartment.labels.length - 3} more</span>` : ''}
+                ${apartment.labels
+                  .slice(0, 3)
+                  .map(
+                    (label) =>
+                      `<span style="display: inline-block; background-color: ${apartment.isDeleted ? "#9CA3AF" : label.color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px; margin-bottom: 2px; ${apartment.isDeleted ? "text-decoration: line-through;" : ""}">${label.name}</span>`,
+                  )
+                  .join("")}
+                ${apartment.labels.length > 3 ? `<span style="font-size: 11px; color: #6b7280;">+${apartment.labels.length - 3} more</span>` : ""}
               </div>
-            ` : ''}
+            `
+                : ""
+            }
             <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-              <span style="font-size: 14px; color: ${apartment.isDeleted ? '#9CA3AF' : '#7c3aed'}; font-weight: 500;">
+              <span style="font-size: 14px; color: ${apartment.isDeleted ? "#9CA3AF" : "#7c3aed"}; font-weight: 500;">
                 💬 ${apartment.commentCount || 0} comments
               </span>
             </div>
@@ -261,13 +276,13 @@ export default function SimpleMap({
           if (mapInstanceRef.current) {
             mapInstanceRef.current.invalidateSize();
             console.log("Map size invalidated");
-            
+
             // Mark map as ready
             setIsMapReady(true);
             console.log("Map is ready, state updated");
           }
         }, 200);
-        
+
         // Additional resize handling for mobile
         const handleResize = () => {
           if (mapInstanceRef.current) {
@@ -276,12 +291,12 @@ export default function SimpleMap({
             }, 100);
           }
         };
-        
-        window.addEventListener('resize', handleResize);
-        
+
+        window.addEventListener("resize", handleResize);
+
         // Clean up resize listener
         return () => {
-          window.removeEventListener('resize', handleResize);
+          window.removeEventListener("resize", handleResize);
         };
       } catch (error) {
         console.error("Error initializing map:", error);
@@ -303,8 +318,11 @@ export default function SimpleMap({
 
   // Update markers when either map becomes ready OR apartments data changes
   useEffect(() => {
-    console.log("Marker update effect triggered", { isMapReady, hasApartments: !!apartments });
-    
+    console.log("Marker update effect triggered", {
+      isMapReady,
+      hasApartments: !!apartments,
+    });
+
     if (isMapReady && apartments) {
       console.log("Both map and apartments ready, adding markers...");
       addApartmentMarkers();
@@ -327,7 +345,7 @@ export default function SimpleMap({
       map.setView([apartment.latitude, apartment.longitude], 16);
     }
   }, [selectedApartmentId, apartments]);
-  
+
   // Handle visibility changes (for mobile view switching)
   useEffect(() => {
     if (isVisible && mapInstanceRef.current) {
@@ -373,7 +391,7 @@ export default function SimpleMap({
       {/* Add Apartment Button */}
       <Button
         onClick={onAddApartment}
-        className="absolute bottom-6 right-6 z-[1000] shadow-lg"
+        className="hidden absolute bottom-6 right-6 z-[1000] shadow-lg"
         size="lg"
         data-testid="button-add-apartment"
       >
