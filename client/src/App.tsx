@@ -91,29 +91,11 @@ function Router() {
         }
       }, 3000);
 
-      // Show notification prompt after install prompt delay - but only if not previously dismissed
-      // const notificationTimer = setTimeout(() => {
-      //   if (hasNotificationBeenDismissed()) {
-      //     return;
-      //   }
-
-      //   if (isSupported && permission === 'default') {
-      //     setShowNotificationPrompt(true);
-      //   }
-      // }, 8000);
-
       return () => {
         clearTimeout(installTimer);
-        // clearTimeout(notificationTimer);
       };
     }
   }, [isAuthenticated, isLoading, isInstallable, isSupported, permission]);
-  // useEffect(() => {
-  //     if (isSupported && permission === 'default') {
-  //       setShowNotificationPrompt(true);
-  //     }
-  //   }, isInstallable ? 8000 : 5000);
-  // })
 
   return (
     <>
@@ -137,7 +119,11 @@ function Router() {
               setInstallDismissed(true);
               // Show notification prompt after install is dismissed
               if (!hasNotificationBeenDismissed()) {
-                setTimeout(() => setShowNotificationPrompt(true), 2000);
+                setTimeout(() => {
+                  if (isSupported && permission === "default") {
+                    setShowNotificationPrompt(true);
+                  }
+                }, 2000);
               }
             }}
           />
