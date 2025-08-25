@@ -631,7 +631,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
                               {formatDistanceToNow(new Date(comment.createdAt!), { addSuffix: true })}
                             </span>
                           </div>
-                          <p className="text-neutral-700 text-xs" data-testid={`comment-text-${comment.id}`}>
+                          <p className="text-neutral-700 text-xs whitespace-pre-wrap" data-testid={`comment-text-${comment.id}`}>
                             {comment.text}
                           </p>
                         </CardContent>
