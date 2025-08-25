@@ -27,7 +27,8 @@ function Router() {
   // Check localStorage for previous responses
   const hasInstallBeenDismissed = () => {
     try {
-      return localStorage.getItem("househunt-install-dismissed") === "true";
+      return localStorage.getItem("househunt-install-dismissed") === "true" ||
+             localStorage.getItem("househunt-install-never-ask") === "true";
     } catch {
       return false;
     }
@@ -35,9 +36,8 @@ function Router() {
 
   const hasNotificationBeenDismissed = () => {
     try {
-      return (
-        localStorage.getItem("househunt-notification-dismissed") === "true"
-      );
+      return localStorage.getItem("househunt-notification-dismissed") === "true" ||
+             localStorage.getItem("househunt-notification-never-ask") === "true";
     } catch {
       return false;
     }

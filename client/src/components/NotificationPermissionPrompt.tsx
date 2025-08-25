@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import {
   Card,
   CardContent,
@@ -20,8 +21,19 @@ export function NotificationPermissionPrompt({
   onDismiss,
 }: NotificationPermissionPromptProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [dontAskAgain, setDontAskAgain] = useState(false);
   const { requestPermission, subscribe, isSupported } = usePushNotifications();
   const { toast } = useToast();
+
+  const saveDontAskAgainPreference = () => {
+    if (dontAskAgain) {
+      try {
+        localStorage.setItem('househunt-notification-never-ask', 'true');
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+  };
 
   const handleEnableNotifications = async () => {
     if (!isSupported) {
@@ -70,6 +82,7 @@ export function NotificationPermissionPrompt({
   };
 
   const handleDecline = () => {
+    saveDontAskAgainPreference();
     toast({
       title: "Notifications Disabled",
       description: "You can enable them later in your browser settings.",
@@ -121,34 +134,46 @@ export function NotificationPermissionPrompt({
           <span>Comments and favorites</span>
         </div>
       </CardContent>
-      <CardFooter className="flex space-x-2 pt-3">
-        <Button
-          onClick={handleEnableNotifications}
-          disabled={isLoading}
-          className="flex-1"
-          data-testid="button-enable-notifications"
-        >
-          {isLoading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Enabling...
-            </>
-          ) : (
-            <>
-              <Bell className="h-4 w-4 mr-2" />
-              Enable Notifications
-            </>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleDecline}
-          className="flex-1"
-          data-testid="button-decline-notifications"
-        >
-          <BellOff className="h-4 w-4 mr-2" />
-          Not Now
-        </Button>
+      <CardFooter className="flex flex-col space-y-3 pt-3">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="dont-ask-notifications"
+            checked={dontAskAgain}
+            onCheckedChange={(checked) => setDontAskAgain(checked as boolean)}
+          />
+          <label htmlFor="dont-ask-notifications" className="text-sm text-muted-foreground cursor-pointer">
+            Don't ask me again
+          </label>
+        </div>
+        <div className="flex space-x-2 w-full">
+          <Button
+            onClick={handleEnableNotifications}
+            disabled={isLoading}
+            className="flex-1"
+            data-testid="button-enable-notifications"
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                Enabling...
+              </>
+            ) : (
+              <>
+                <Bell className="h-4 w-4 mr-2" />
+                Enable Notifications
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleDecline}
+            className="flex-1"
+            data-testid="button-decline-notifications"
+          >
+            <BellOff className="h-4 w-4 mr-2" />
+            Not Now
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
+import { Checkbox } from './ui/checkbox';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Download, Smartphone, X } from 'lucide-react';
 import { usePWA } from '../hooks/usePWA';
@@ -11,8 +12,19 @@ interface InstallPromptProps {
 
 export function InstallPrompt({ onDismiss }: InstallPromptProps) {
   const [isInstalling, setIsInstalling] = useState(false);
+  const [dontAskAgain, setDontAskAgain] = useState(false);
   const { installApp, isInstallable } = usePWA();
   const { toast } = useToast();
+
+  const saveDontAskAgainPreference = () => {
+    if (dontAskAgain) {
+      try {
+        localStorage.setItem('househunt-install-never-ask', 'true');
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+  };
 
   const handleInstall = async () => {
     setIsInstalling(true);
@@ -44,6 +56,7 @@ export function InstallPrompt({ onDismiss }: InstallPromptProps) {
   };
 
   const handleDismiss = () => {
+    saveDontAskAgainPreference();
     toast({
       title: "Install Later",
       description: "You can install HouseHunt anytime from your browser menu.",
@@ -91,33 +104,45 @@ export function InstallPrompt({ onDismiss }: InstallPromptProps) {
           <span>Native app experience</span>
         </div>
       </CardContent>
-      <CardFooter className="flex space-x-2 pt-3">
-        <Button
-          onClick={handleInstall}
-          disabled={isInstalling}
-          className="flex-1"
-          data-testid="button-install-app"
-        >
-          {isInstalling ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Installing...
-            </>
-          ) : (
-            <>
-              <Download className="h-4 w-4 mr-2" />
-              Install App
-            </>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleDismiss}
-          className="flex-1"
-          data-testid="button-install-later"
-        >
-          Later
-        </Button>
+      <CardFooter className="flex flex-col space-y-3 pt-3">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="dont-ask-install"
+            checked={dontAskAgain}
+            onCheckedChange={(checked) => setDontAskAgain(checked as boolean)}
+          />
+          <label htmlFor="dont-ask-install" className="text-sm text-muted-foreground cursor-pointer">
+            Don't ask me again
+          </label>
+        </div>
+        <div className="flex space-x-2 w-full">
+          <Button
+            onClick={handleInstall}
+            disabled={isInstalling}
+            className="flex-1"
+            data-testid="button-install-app"
+          >
+            {isInstalling ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                Installing...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Install App
+              </>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleDismiss}
+            className="flex-1"
+            data-testid="button-install-later"
+          >
+            Later
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
