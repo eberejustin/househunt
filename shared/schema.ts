@@ -95,7 +95,7 @@ export const notifications = pgTable("notifications", {
   userId: varchar("user_id").notNull().references(() => users.id), // Who receives the notification
   actorId: varchar("actor_id").notNull().references(() => users.id), // Who performed the action
   apartmentId: varchar("apartment_id").notNull().references(() => apartments.id, { onDelete: 'cascade' }),
-  type: varchar("type").notNull(), // 'new_apartment', 'new_comment', 'apartment_updated', 'apartment_favorited'
+  type: varchar("type").notNull(), // 'new_apartment', 'new_comment', 'apartment_updated', 'apartment_favorited', 'status_changed', 'apartment_archived'
   title: text("title").notNull(),
   message: text("message").notNull(),
   isRead: boolean("is_read").default(false).notNull(),

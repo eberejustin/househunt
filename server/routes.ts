@@ -90,14 +90,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/apartments/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
+      const userId = req.user.claims.sub;
       const apartmentData = updateApartmentSchema.parse(req.body);
+      
+      // Get the current apartment to check for status changes
+      const currentApartment = await storage.getApartment(id, userId);
+      if (!currentApartment) {
+        return res.status(404).json({ message: "Apartment not found" });
+      }
       
       const apartment = await storage.updateApartment(id, apartmentData);
       if (!apartment) {
         return res.status(404).json({ message: "Apartment not found" });
       }
       
-      // Note: No notification needed for apartment updates
+      // Create notification for status changes
+      if (apartmentData.status && apartmentData.status !== currentApartment.status) {
+        const user = await storage.getUser(userId);
+        const userName = getUserDisplayName(user || { firstName: null, lastName: null, email: null });
+        const statusDisplay = apartmentData.status || "Not started";
+        
+        await createAndBroadcastNotification(
+          'status_changed',
+          userId,
+          id,
+          'Apartment Status Updated',
+          `${userName} updated status for "${apartment.label || apartment.address}" to: ${statusDisplay}`
+        );
+      }
       
       res.json(apartment);
     } catch (error) {
@@ -242,7 +262,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const userId = req.user.claims.sub;
 
+      // Get current state before toggling
+      const currentApartment = await storage.getApartment(id, userId);
+      if (!currentApartment) {
+        return res.status(404).json({ message: "Apartment not found" });
+      }
+
       const result = await storage.toggleDeleted(id, userId);
+      
+      // Create notification for deleted status changes
+      const user = await storage.getUser(userId);
+      const userName = getUserDisplayName(user || { firstName: null, lastName: null, email: null });
+      const action = result.isDeleted ? "archived" : "restored";
+      
+      await createAndBroadcastNotification(
+        'apartment_archived',
+        userId,
+        id,
+        `Apartment ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+        `${userName} ${action} "${result.label || result.address}"`
+      );
       
       res.json(result);
     } catch (error) {

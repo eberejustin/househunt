@@ -14,6 +14,10 @@ Deleted listings: Use symmetrical circular grey markers instead of teardrop shap
 
 # Recent Changes
 
+- **Status Change Notifications (August 2025)**: Added notifications for apartment status updates and archive/restore actions
+  - Users receive notifications when someone changes an apartment's status (Not started, Contacted, Viewed, Applied, Rented)
+  - Users receive notifications when apartments are archived or restored from archive
+  - Added new notification types: 'status_changed' and 'apartment_archived' to the system
 - **PWA Conversion (August 2025)**: Successfully converted HouseHunt to a Progressive Web App with full installability and push notifications
   - Added comprehensive PWA manifest with app icons, shortcuts, and screenshots
   - Implemented service worker for offline functionality and push notification handling
