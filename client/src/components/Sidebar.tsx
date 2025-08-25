@@ -126,7 +126,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: async (apartmentId: string) => {
-      await apiRequest('POST', `/api/apartments/${apartmentId}/favorite`);
+      await apiRequest(`/api/apartments/${apartmentId}/favorite`, 'POST');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
@@ -153,7 +153,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
 
   const toggleDeletedMutation = useMutation({
     mutationFn: async (apartmentId: string) => {
-      await apiRequest('POST', `/api/apartments/${apartmentId}/toggle-deleted`);
+      await apiRequest(`/api/apartments/${apartmentId}/toggle-deleted`, 'POST');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
@@ -184,7 +184,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
 
   const addCommentMutation = useMutation({
     mutationFn: async ({ apartmentId, text }: { apartmentId: string; text: string }) => {
-      await apiRequest('POST', `/api/apartments/${apartmentId}/comments`, { text });
+      await apiRequest(`/api/apartments/${apartmentId}/comments`, 'POST', { text });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/apartments', selectedApartmentId, 'comments'] });

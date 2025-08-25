@@ -244,7 +244,7 @@ export default function AddApartmentModal({
       
       const method = editingApartment ? 'PATCH' : 'POST';
       const url = editingApartment ? `/api/apartments/${editingApartment.id}` : '/api/apartments';
-      const result = await apiRequest(method, url, apartmentData);
+      const result = await apiRequest(url, method, apartmentData);
       console.log('API request result:', result);
       return result;
     },

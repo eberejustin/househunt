@@ -51,13 +51,13 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
   // Create label mutation
   const createLabelMutation = useMutation({
     mutationFn: async (data: CreateLabelFormData) => {
-      const response = await apiRequest("POST", "/api/labels", data);
+      const response = await apiRequest("/api/labels", "POST", data);
       return response.json();
     },
     onSuccess: async (newLabel) => {
       // Automatically add the new label to the current apartment
       try {
-        await apiRequest("POST", `/api/apartments/${apartmentId}/labels`, { labelId: newLabel.id });
+        await apiRequest(`/api/apartments/${apartmentId}/labels`, "POST", { labelId: newLabel.id });
         queryClient.invalidateQueries({ queryKey: ["/api/labels"] });
         queryClient.invalidateQueries({ queryKey: ["/api/apartments"] });
         onLabelsChange?.();
@@ -88,7 +88,7 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
   // Add label to apartment mutation
   const addLabelMutation = useMutation({
     mutationFn: async (labelId: string) => {
-      return apiRequest("POST", `/api/apartments/${apartmentId}/labels`, { labelId });
+      return apiRequest(`/api/apartments/${apartmentId}/labels`, "POST", { labelId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/apartments"] });
@@ -107,7 +107,7 @@ export function LabelSelector({ apartmentId, selectedLabels, onLabelsChange }: L
   // Remove label from apartment mutation
   const removeLabelMutation = useMutation({
     mutationFn: async (labelId: string) => {
-      return apiRequest("DELETE", `/api/apartments/${apartmentId}/labels/${labelId}`);
+      return apiRequest(`/api/apartments/${apartmentId}/labels/${labelId}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/apartments"] });
