@@ -42,6 +42,7 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
   const { data: apartments, isLoading: apartmentsLoading, error: apartmentsError } = useQuery({
     queryKey: ['/api/apartments'],
     retry: false,
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   const apartmentsArray = apartments as ApartmentWithDetails[] || [];
@@ -50,12 +51,14 @@ export default function Sidebar({ selectedApartmentId, onSelectApartment, onEdit
     queryKey: ['/api/apartments', selectedApartmentId, 'comments'],
     enabled: !!selectedApartmentId,
     retry: false,
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch all labels for filtering
   const { data: allLabels = [] } = useQuery<Label[]>({
     queryKey: ['/api/labels'],
     retry: false,
+    refetchInterval: 60000, // Refresh every 60 seconds (labels change less frequently)
   });
 
   const selectedApartment = useMemo(() => {

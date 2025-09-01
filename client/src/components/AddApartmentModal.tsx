@@ -250,8 +250,13 @@ export default function AddApartmentModal({
     },
     onSuccess: (data) => {
       console.log('Mutation success:', data);
-      // Force refresh the apartments data
+      // Force refresh all related data
       queryClient.invalidateQueries({ queryKey: ['/api/apartments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/labels'] });
+      // If we're editing, also refresh comments for this apartment
+      if (editingApartment) {
+        queryClient.invalidateQueries({ queryKey: ['/api/apartments', editingApartment.id, 'comments'] });
+      }
       queryClient.refetchQueries({ queryKey: ['/api/apartments'] });
       toast({
         title: "Success",
