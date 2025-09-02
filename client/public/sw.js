@@ -9,8 +9,8 @@ const STATIC_CACHE_URLS = [
   '/icon-512.png'
 ];
 
-// Check if we're in development mode
-const isDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('replit');
+// Always use network-first strategy to prevent aggressive caching
+const useNetworkFirst = true;
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -58,12 +58,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Use network-first strategy in development for fresh content
-  if (isDevelopment) {
+  // Use network-first strategy to prevent aggressive caching
+  if (useNetworkFirst) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Don't cache in development to avoid stale content
+          // Don't cache to avoid stale content
           return response;
         })
         .catch(() => {
@@ -81,7 +81,7 @@ self.addEventListener('fetch', (event) => {
         })
     );
   } else {
-    // Use cache-first strategy in production
+    // Use cache-first strategy (currently disabled)
     event.respondWith(
       caches.match(event.request)
         .then((cachedResponse) => {

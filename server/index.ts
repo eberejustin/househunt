@@ -6,17 +6,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add cache control headers for development to prevent aggressive caching
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-    next();
+// Add cache control headers to prevent aggressive caching in both dev and prod
+app.use((req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
   });
-}
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
