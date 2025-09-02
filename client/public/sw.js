@@ -9,6 +9,9 @@ const STATIC_CACHE_URLS = [
   '/icon-512.png'
 ];
 
+// Check if we're in development mode
+const isDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('replit');
+
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing...');
@@ -43,7 +46,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache with network fallback
+// Fetch event - serve from cache with network fallback (or network-first in development)
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
@@ -55,41 +58,66 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // Return cached version if available
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+  // Use network-first strategy in development for fresh content
+  if (isDevelopment) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Don't cache in development to avoid stale content
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache if network fails
+          return caches.match(event.request)
+            .then((cachedResponse) => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              // Return offline page for navigation requests
+              if (event.request.mode === 'navigate') {
+                return caches.match('/');
+              }
+            });
+        })
+    );
+  } else {
+    // Use cache-first strategy in production
+    event.respondWith(
+      caches.match(event.request)
+        .then((cachedResponse) => {
+          // Return cached version if available
+          if (cachedResponse) {
+            return cachedResponse;
+          }
 
-        // Otherwise fetch from network
-        return fetch(event.request)
-          .then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+          // Otherwise fetch from network
+          return fetch(event.request)
+            .then((response) => {
+              // Don't cache non-successful responses
+              if (!response || response.status !== 200 || response.type !== 'basic') {
+                return response;
+              }
+
+              // Clone response for caching
+              const responseToCache = response.clone();
+
+              // Cache the response for future use
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
+
               return response;
-            }
-
-            // Clone response for caching
-            const responseToCache = response.clone();
-
-            // Cache the response for future use
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch(() => {
-            // Return offline page for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/');
-            }
-          });
-      })
-  );
+            })
+            .catch(() => {
+              // Return offline page for navigation requests
+              if (event.request.mode === 'navigate') {
+                return caches.match('/');
+              }
+            });
+        })
+    );
+  }
 });
 
 // Push event - handle push notifications
