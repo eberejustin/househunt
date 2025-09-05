@@ -150,17 +150,14 @@ export default function GoogleMap({
 
         // Custom styling based on apartment status
         if (apartment.isDeleted) {
-          markerContent = document.createElement("div");
-          markerContent.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000" width="20" height="20">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM17 12.5c0 .28-.22.5-.5.5h-9c-.28 0-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5h9c.28 0 .5.22.5.5v1zM8.5 8C7.67 8 7 7.33 7 6.5S7.67 5 8.5 5 10 5.67 10 6.5 9.33 8 8.5 8zm7 0C14.67 8 14 7.33 14 6.5S14.67 5 15.5 5 17 5.67 17 6.5 16.33 8 15.5 8z"/>
-              <circle cx="8.5" cy="6.5" r="1.5" fill="white"/>
-              <circle cx="15.5" cy="6.5" r="1.5" fill="white"/>
-            </svg>
-          `;
-          markerContent.style.cssText = `
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-          `;
+          // Use greyed out default marker for deleted apartments
+          const greyPin = new google.maps.marker.PinElement({
+            scale: 0.75,
+            background: "#9ca3af", // Grey background
+            borderColor: "#6b7280", // Darker grey border
+            glyphColor: "white"
+          });
+          markerContent = greyPin.element;
         } else if (apartment.isFavorited) {
           markerContent = document.createElement("div");
           markerContent.innerHTML = `
