@@ -63,14 +63,19 @@ export default function GoogleMap({
         window.location.href = "/api/login";
       }, 500);
     }
-  }, [error, toast]);
+  }, [error]); // Remove toast from dependencies
 
   // Initialize Google Maps when the ref is ready
   useEffect(() => {
+    console.log("Map initialization effect triggered", { isRefReady, hasMapRef: !!mapRef.current, hasMapInstance: !!mapInstanceRef.current });
+    
     const initializeMap = async () => {
       if (!isRefReady || !mapRef.current || mapInstanceRef.current) {
+        console.log("Skipping initialization", { isRefReady, hasMapRef: !!mapRef.current, hasMapInstance: !!mapInstanceRef.current });
         return;
       }
+
+      console.log("Starting map initialization...");
 
       try {
         // Fetch API key from backend
