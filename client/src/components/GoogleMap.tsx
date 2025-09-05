@@ -57,23 +57,7 @@ export default function GoogleMap({
   // Initialize Google Maps
   useEffect(() => {
     const initializeMap = async () => {
-      console.log('GoogleMap: initializeMap called', {
-        hasMapRef: !!mapRef.current,
-        hasMapInstance: !!mapInstanceRef.current,
-        isVisible
-      });
-      
-      // Don't reinitialize if map already exists
-      if (!mapRef.current || mapInstanceRef.current) {
-        console.log('GoogleMap: Skipping initialization - no ref or map already exists');
-        return;
-      }
-      
-      // Don't initialize if not visible (for mobile)
-      if (!isVisible) {
-        console.log('GoogleMap: Not visible, skipping initialization');
-        return;
-      }
+      if (!mapRef.current || mapInstanceRef.current) return;
 
       try {
         // Fetch API key from backend
@@ -122,24 +106,14 @@ export default function GoogleMap({
       }
     };
 
-    // Wait for DOM element to be available
-    const checkAndInitialize = () => {
-      if (mapRef.current) {
-        initializeMap();
-      } else {
-        // Retry in a short interval until element is available
-        setTimeout(checkAndInitialize, 50);
+    initializeMap();
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current = null;
       }
     };
-    
-    checkAndInitialize();
-
-    // Cleanup function - only clear on unmount, not on dependency changes
-    return () => {
-      console.log('GoogleMap: Cleanup function called');
-      // Don't clear map instance unless component is actually unmounting
-    };
-  }, [isVisible]); // Removed toast dependency to prevent unnecessary re-runs
+  }, [toast]);
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
