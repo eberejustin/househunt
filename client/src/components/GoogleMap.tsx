@@ -63,7 +63,11 @@ export default function GoogleMap({
         isVisible
       });
       
-      if (!mapRef.current || mapInstanceRef.current) return;
+      // Don't reinitialize if map already exists
+      if (!mapRef.current || mapInstanceRef.current) {
+        console.log('GoogleMap: Skipping initialization - no ref or map already exists');
+        return;
+      }
       
       // Don't initialize if not visible (for mobile)
       if (!isVisible) {
@@ -130,12 +134,12 @@ export default function GoogleMap({
     
     checkAndInitialize();
 
+    // Cleanup function - only clear on unmount, not on dependency changes
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current = null;
-      }
+      console.log('GoogleMap: Cleanup function called');
+      // Don't clear map instance unless component is actually unmounting
     };
-  }, [toast, isVisible]);
+  }, [isVisible]); // Removed toast dependency to prevent unnecessary re-runs
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
