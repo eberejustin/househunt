@@ -153,8 +153,8 @@ export default function GoogleMap({
           // Use greyed out default marker for deleted apartments
           const greyPin = new google.maps.marker.PinElement({
             scale: 0.75,
-            background: "#9ca3af", // Grey background
-            borderColor: "#6b7280", // Darker grey border
+            background: "#636363", // Grey background
+            borderColor: "#636363", // Darker grey border
             glyphColor: "white",
             glyph: "💀",
           });
