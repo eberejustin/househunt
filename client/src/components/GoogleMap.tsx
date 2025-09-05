@@ -57,7 +57,19 @@ export default function GoogleMap({
   // Initialize Google Maps
   useEffect(() => {
     const initializeMap = async () => {
+      console.log('GoogleMap: initializeMap called', {
+        hasMapRef: !!mapRef.current,
+        hasMapInstance: !!mapInstanceRef.current,
+        isVisible
+      });
+      
       if (!mapRef.current || mapInstanceRef.current) return;
+      
+      // Don't initialize if not visible (for mobile)
+      if (!isVisible) {
+        console.log('GoogleMap: Not visible, skipping initialization');
+        return;
+      }
 
       try {
         // Fetch API key from backend
@@ -106,14 +118,18 @@ export default function GoogleMap({
       }
     };
 
-    initializeMap();
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      initializeMap();
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (mapInstanceRef.current) {
         mapInstanceRef.current = null;
       }
     };
-  }, [toast]);
+  }, [toast, isVisible]);
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
