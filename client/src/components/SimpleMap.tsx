@@ -2,9 +2,10 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Train, Crosshair } from "lucide-react";
 import type { ApartmentWithDetails } from "@shared/schema";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { fetchTransitData, getMapBounds, type TransitStation, type TransitLine } from "@/lib/transitService";
 
 // Leaflet imports
 import L from "leaflet";
@@ -37,7 +38,10 @@ export default function SimpleMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
+  const transitLayerRef = useRef<L.LayerGroup | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [showTransit, setShowTransit] = useState(false);
+  const [isLoadingTransit, setIsLoadingTransit] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -269,6 +273,9 @@ export default function SimpleMap({
 
         console.log("Tile layer added");
 
+        // Initialize transit layer
+        transitLayerRef.current = L.layerGroup();
+
         mapInstanceRef.current = map;
 
         // Force map resize after a short delay
@@ -359,6 +366,133 @@ export default function SimpleMap({
     }
   }, [isVisible]);
 
+  // Load transit data for current map view
+  const loadTransitData = async () => {
+    const map = mapInstanceRef.current;
+    const transitLayer = transitLayerRef.current;
+    
+    if (!map || !transitLayer) return;
+
+    setIsLoadingTransit(true);
+    
+    try {
+      const bounds = getMapBounds(map);
+      const { stations, lines } = await fetchTransitData(bounds);
+
+      // Clear existing transit data
+      transitLayer.clearLayers();
+
+      // Add train lines
+      lines.forEach((line: TransitLine) => {
+        const polyline = L.polyline(line.coordinates, {
+          color: line.color,
+          weight: 3,
+          opacity: 0.8
+        });
+
+        polyline.bindPopup(`
+          <div class="p-2">
+            <h4 class="font-semibold text-sm">${line.name}</h4>
+            <p class="text-xs text-neutral-600 capitalize">${line.type} line</p>
+          </div>
+        `);
+
+        transitLayer.addLayer(polyline);
+      });
+
+      // Add train stations
+      stations.forEach((station: TransitStation) => {
+        const stationIcon = L.divIcon({
+          className: `transit-station ${station.type}`,
+          html: getStationIcon(station.type),
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+
+        const marker = L.marker([station.lat, station.lng], {
+          icon: stationIcon
+        });
+
+        marker.bindPopup(`
+          <div class="p-2">
+            <h4 class="font-semibold text-sm">${station.name}</h4>
+            <p class="text-xs text-neutral-600 capitalize">${station.type} station</p>
+            ${station.line ? `<p class="text-xs text-neutral-500">Line: ${station.line}</p>` : ''}
+          </div>
+        `);
+
+        transitLayer.addLayer(marker);
+      });
+
+      toast({
+        title: "Transit data loaded",
+        description: `Found ${stations.length} stations and ${lines.length} lines`,
+      });
+
+    } catch (error) {
+      console.error('Error loading transit data:', error);
+      toast({
+        title: "Error loading transit data",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingTransit(false);
+    }
+  };
+
+  // Get station icon based on type
+  const getStationIcon = (type: string) => {
+    switch (type) {
+      case 'subway':
+        return '🚇';
+      case 'train':
+        return '🚂';
+      case 'bus':
+        return '🚌';
+      default:
+        return '🚉';
+    }
+  };
+
+  // Toggle transit overlay
+  const toggleTransit = async () => {
+    const map = mapInstanceRef.current;
+    const transitLayer = transitLayerRef.current;
+    
+    if (!map || !transitLayer) return;
+
+    if (showTransit) {
+      // Hide transit layer
+      map.removeLayer(transitLayer);
+      setShowTransit(false);
+    } else {
+      // Show transit layer and load data if not already loaded
+      map.addLayer(transitLayer);
+      setShowTransit(true);
+      
+      // Load data if layer is empty
+      if (!transitLayer.getLayers().length) {
+        await loadTransitData();
+      }
+    }
+  };
+
+  // Center map on apartment markers
+  const centerMap = () => {
+    const map = mapInstanceRef.current;
+    if (map && apartments) {
+      const apartmentsArray = apartments as ApartmentWithDetails[];
+      if (apartmentsArray.length > 0) {
+        const markers = Object.values(markersRef.current);
+        if (markers.length > 0) {
+          const group = new L.FeatureGroup(markers);
+          map.fitBounds(group.getBounds().pad(0.1));
+        }
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-neutral-50">
@@ -388,6 +522,36 @@ export default function SimpleMap({
         }}
       />
 
+      {/* Map Controls */}
+      <div className="absolute top-4 right-4 flex flex-col space-y-2 z-[1000]">
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={centerMap}
+          className="bg-white shadow-lg hover:bg-neutral-50"
+          title="Center map"
+          data-testid="button-center-map"
+        >
+          <Crosshair className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={toggleTransit}
+          className={`bg-white shadow-lg hover:bg-neutral-50 ${showTransit ? 'bg-blue-50 text-blue-600 border-blue-200' : ''}`}
+          title="Toggle transit overlay"
+          data-testid="button-toggle-transit"
+          disabled={isLoadingTransit}
+        >
+          {isLoadingTransit ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+          ) : (
+            <Train className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
       {/* Add Apartment Button */}
       <Button
         onClick={onAddApartment}
@@ -398,6 +562,36 @@ export default function SimpleMap({
         <Plus className="h-5 w-5 mr-2" />
         Add Apartment
       </Button>
+
+      <style>{`
+        .transit-station {
+          background: white;
+          border: 2px solid #666;
+          border-radius: 50%;
+          width: 16px;
+          height: 16px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 8px;
+        }
+        
+        .transit-station.train {
+          border-color: #FF6B35;
+          background: #FFF2ED;
+        }
+        
+        .transit-station.subway {
+          border-color: #1E3A8A;
+          background: #EFF6FF;
+        }
+        
+        .transit-station.bus {
+          border-color: #059669;
+          background: #ECFDF5;
+        }
+      `}</style>
     </div>
   );
 }
