@@ -31,12 +31,15 @@ export default function GoogleMap({
   const { toast } = useToast();
 
   // Ref callback to track when DOM element is ready
-  const mapRefCallback = useCallback((element: HTMLDivElement | null) => {
-    if (element && !isRefReady) {
-      mapRef.current = element;
-      setIsRefReady(true);
-    }
-  }, [isRefReady]);
+  const mapRefCallback = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (element && !isRefReady) {
+        mapRef.current = element;
+        setIsRefReady(true);
+      }
+    },
+    [isRefReady],
+  );
 
   const {
     data: apartments,
@@ -135,6 +138,11 @@ export default function GoogleMap({
 
     const apartmentsArray = apartments as ApartmentWithDetails[];
 
+    // create default marker
+    const defaultPin = new google.maps.marker.PinElement({
+      glyph: "🏠",
+    });
+
     apartmentsArray.forEach((apartment) => {
       try {
         let markerContent: HTMLElement | null = null;
@@ -162,6 +170,8 @@ export default function GoogleMap({
           markerContent.style.cssText = `
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
           `;
+        } else {
+          markerContent = defaultPin.element;
         }
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -310,7 +320,6 @@ export default function GoogleMap({
       }, 100);
     }
   }, [isVisible]);
-
 
   // Center map on apartment markers
   const centerMap = () => {
