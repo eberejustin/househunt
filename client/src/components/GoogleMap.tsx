@@ -135,18 +135,20 @@ export default function GoogleMap({
         // Custom styling based on apartment status
         if (apartment.isDeleted) {
           markerContent = document.createElement('div');
+          markerContent.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000" width="20" height="20">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM17 12.5c0 .28-.22.5-.5.5h-9c-.28 0-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5h9c.28 0 .5.22.5.5v1zM8.5 8C7.67 8 7 7.33 7 6.5S7.67 5 8.5 5 10 5.67 10 6.5 9.33 8 8.5 8zm7 0C14.67 8 14 7.33 14 6.5S14.67 5 15.5 5 17 5.67 17 6.5 16.33 8 15.5 8z"/>
+              <circle cx="8.5" cy="6.5" r="1.5" fill="white"/>
+              <circle cx="15.5" cy="6.5" r="1.5" fill="white"/>
+            </svg>
+          `;
           markerContent.style.cssText = `
-            width: 20px;
-            height: 20px;
-            background-color: #9CA3AF;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
           `;
         } else if (apartment.isFavorited) {
           markerContent = document.createElement('div');
           markerContent.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" width="32" height="32">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" width="20" height="20">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
           `;
