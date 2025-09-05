@@ -180,6 +180,7 @@ export default function GoogleMap({
           map: map,
           title: apartment.label,
           content: markerContent,
+          gmpClickable: true,
         });
 
         // Create info window with apartment details
