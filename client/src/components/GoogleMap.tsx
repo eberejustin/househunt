@@ -57,7 +57,7 @@ export default function GoogleMap({
   // Initialize Google Maps
   useEffect(() => {
     const initializeMap = async () => {
-      if (!mapRef.current || mapInstanceRef.current) return;
+      if (!mapRef.current || mapInstanceRef.current || !isVisible) return;
 
       try {
         // Fetch API key from backend
@@ -106,14 +106,16 @@ export default function GoogleMap({
       }
     };
 
-    initializeMap();
+    if (isVisible) {
+      initializeMap();
+    }
 
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current = null;
       }
     };
-  }, [toast]);
+  }, [toast, isVisible]);
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
@@ -349,6 +351,32 @@ export default function GoogleMap({
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
           <p className="text-sm text-neutral-600">Loading apartments...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Handle map resize when visibility changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (map && isVisible && isMapReady) {
+      // Trigger resize and center map
+      setTimeout(() => {
+        google.maps.event.trigger(map, 'resize');
+        if (apartments && apartments.length > 0) {
+          const bounds = new google.maps.LatLngBounds();
+          apartments.forEach((apt: ApartmentWithDetails) => {
+            bounds.extend(new google.maps.LatLng(apt.latitude, apt.longitude));
+          });
+          map.fitBounds(bounds);
+        }
+      }, 100);
+    }
+  }, [isVisible, isMapReady, apartments]);
+
+  if (!isVisible) {
+    return (
+      <div className="relative flex-1 h-full bg-neutral-100 flex items-center justify-center">
+        <div className="text-neutral-500">Map is loading...</div>
       </div>
     );
   }
