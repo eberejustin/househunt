@@ -56,25 +56,13 @@ export default function GoogleMap({
     }
   }, [error, toast]);
 
-  // Initialize Google Maps
+  // Initialize Google Maps when the ref is available
   useEffect(() => {
-    console.log("Google maps use effect triggered", {
-      mapRefCurrent: !!mapRef.current,
-      mapInstanceRefCurrent: !!mapInstanceRef.current,
-    });
-
     const initializeMap = async () => {
-      if (!mapRef.current) {
-        console.log("No mapRef.current available, retrying...");
-        // Retry after a short delay
-        setTimeout(initializeMap, 100);
+      if (!mapRef.current || mapInstanceRef.current) {
         return;
       }
 
-      if (mapInstanceRef.current) {
-        console.log("Map already initialized");
-        return;
-      }
       try {
         // Fetch API key from backend
         const response = await fetch("/api/config/google-maps-key");
@@ -82,13 +70,6 @@ export default function GoogleMap({
           throw new Error("Failed to fetch Google Maps API key");
         }
         const { apiKey } = await response.json();
-
-        console.log(
-          "Google Maps API Key available:",
-          !!apiKey,
-          "Length:",
-          apiKey.length
-        );
 
         if (!apiKey) {
           throw new Error("Google Maps API key is not available.");
@@ -127,14 +108,16 @@ export default function GoogleMap({
       }
     };
 
-    initializeMap();
+    // Small delay to ensure the DOM is ready
+    const timeoutId = setTimeout(initializeMap, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       if (mapInstanceRef.current) {
         mapInstanceRef.current = null;
       }
     };
-  }, []); // Only run once on mount
+  }, [isVisible]); // Re-run when visibility changes
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
@@ -206,8 +189,8 @@ export default function GoogleMap({
               </span>
               <span style="color: #6b7280;">
                 ${apartment.bedrooms ? `${apartment.bedrooms} BR` : "N/A"}${
-          apartment.bathrooms ? `/${apartment.bathrooms} BA` : ""
-        }
+                  apartment.bathrooms ? `/${apartment.bathrooms} BA` : ""
+                }
               </span>
             </div>
             ${
@@ -227,7 +210,7 @@ export default function GoogleMap({
                     (label) =>
                       `<span style="display: inline-block; margin-right: 4px; margin-bottom: 4px; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 500; background-color: ${label.color}20; color: ${label.color}; border: 1px solid ${label.color}40;">
                     ${label.name}
-                  </span>`
+                  </span>`,
                   )
                   .join("")}
               </div>`
