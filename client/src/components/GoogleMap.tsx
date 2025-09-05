@@ -22,7 +22,7 @@ export default function GoogleMap({
 }: GoogleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<{ [key: string]: google.maps.Marker }>({});
+  const markersRef = useRef<{ [key: string]: google.maps.marker.AdvancedMarkerElement }>({});
   const transitLayerRef = useRef<google.maps.TransitLayer | null>(null);
   const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
@@ -76,10 +76,11 @@ export default function GoogleMap({
         const loader = new Loader({
           apiKey: apiKey,
           version: "weekly",
-          libraries: ["places", "geometry"]
+          libraries: ["places", "geometry", "marker"]
         });
 
         const { Map } = await loader.importLibrary("maps");
+        const { AdvancedMarkerElement } = await loader.importLibrary("marker");
         
         const map = new Map(mapRef.current, {
           center: { lat: 40.7128, lng: -74.0060 },
@@ -121,7 +122,7 @@ export default function GoogleMap({
 
     // Clear existing markers
     Object.values(markersRef.current).forEach((marker) => {
-      marker.setMap(null);
+      marker.map = null;
     });
     markersRef.current = {};
 
@@ -129,35 +130,37 @@ export default function GoogleMap({
 
     apartmentsArray.forEach((apartment) => {
       try {
-        let markerOptions: google.maps.MarkerOptions = {
-          position: { lat: apartment.latitude, lng: apartment.longitude },
-          map: map,
-          title: apartment.label,
-        };
+        let markerContent: HTMLElement | null = null;
 
         // Custom styling based on apartment status
         if (apartment.isDeleted) {
-          markerOptions.icon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#9CA3AF',
-            fillOpacity: 0.8,
-            strokeColor: '#fff',
-            strokeWeight: 3,
-            scale: 8,
-          };
+          markerContent = document.createElement('div');
+          markerContent.style.cssText = `
+            width: 20px;
+            height: 20px;
+            background-color: #9CA3AF;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          `;
         } else if (apartment.isFavorited) {
-          markerOptions.icon = {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" width="24" height="24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-            `),
-            scaledSize: new google.maps.Size(32, 32),
-            anchor: new google.maps.Point(16, 32),
-          };
+          markerContent = document.createElement('div');
+          markerContent.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ef4444" width="32" height="32">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          `;
+          markerContent.style.cssText = `
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+          `;
         }
 
-        const marker = new google.maps.Marker(markerOptions);
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: apartment.latitude, lng: apartment.longitude },
+          map: map,
+          title: apartment.label,
+          content: markerContent,
+        });
 
         // Create info window with apartment details
         const popupContent = `
@@ -214,7 +217,10 @@ export default function GoogleMap({
             }
           });
           
-          infoWindow.open(map, marker);
+          infoWindow.open({
+            anchor: marker,
+            map: map,
+          });
           onSelectApartment(apartment.id);
         });
 
