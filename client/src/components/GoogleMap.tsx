@@ -118,13 +118,19 @@ export default function GoogleMap({
       }
     };
 
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      initializeMap();
-    }, 100);
+    // Wait for DOM element to be available
+    const checkAndInitialize = () => {
+      if (mapRef.current) {
+        initializeMap();
+      } else {
+        // Retry in a short interval until element is available
+        setTimeout(checkAndInitialize, 50);
+      }
+    };
+    
+    checkAndInitialize();
 
     return () => {
-      clearTimeout(timer);
       if (mapInstanceRef.current) {
         mapInstanceRef.current = null;
       }
