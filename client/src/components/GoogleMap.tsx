@@ -64,8 +64,17 @@ export default function GoogleMap({
     });
 
     const initializeMap = async () => {
-      if (!mapRef.current || mapInstanceRef.current) return;
+      if (!mapRef.current) {
+        console.log("No mapRef.current available, retrying...");
+        // Retry after a short delay
+        setTimeout(initializeMap, 100);
+        return;
+      }
 
+      if (mapInstanceRef.current) {
+        console.log("Map already initialized");
+        return;
+      }
       try {
         // Fetch API key from backend
         const response = await fetch("/api/config/google-maps-key");
