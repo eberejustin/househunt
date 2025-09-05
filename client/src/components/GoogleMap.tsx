@@ -28,10 +28,19 @@ export default function GoogleMap({
   const transitLayerRef = useRef<google.maps.TransitLayer | null>(null);
   const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [isRefReady, setIsRefReady] = useState(false);
   const [showTransit, setShowTransit] = useState(false);
   const [showTraffic, setShowTraffic] = useState(false);
   const [isLoadingTransit, setIsLoadingTransit] = useState(false);
   const { toast } = useToast();
+
+  // Ref callback to track when DOM element is ready
+  const mapRefCallback = useCallback((element: HTMLDivElement | null) => {
+    if (element) {
+      mapRef.current = element;
+      setIsRefReady(true);
+    }
+  }, []);
 
   const {
     data: apartments,
@@ -56,10 +65,10 @@ export default function GoogleMap({
     }
   }, [error, toast]);
 
-  // Initialize Google Maps when the ref is available
+  // Initialize Google Maps when the ref is ready
   useEffect(() => {
     const initializeMap = async () => {
-      if (!mapRef.current || mapInstanceRef.current) {
+      if (!isRefReady || !mapRef.current || mapInstanceRef.current) {
         return;
       }
 
@@ -108,16 +117,14 @@ export default function GoogleMap({
       }
     };
 
-    // Small delay to ensure the DOM is ready
-    const timeoutId = setTimeout(initializeMap, 100);
+    initializeMap();
 
     return () => {
-      clearTimeout(timeoutId);
       if (mapInstanceRef.current) {
         mapInstanceRef.current = null;
       }
     };
-  }, [isVisible]); // Re-run when visibility changes
+  }, [isRefReady]); // Initialize when ref becomes ready
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
@@ -387,7 +394,7 @@ export default function GoogleMap({
   return (
     <div className="relative flex-1 h-full bg-neutral-100">
       <div
-        ref={mapRef}
+        ref={mapRefCallback}
         className="w-full h-full"
         data-testid="google-map-container"
         style={{
