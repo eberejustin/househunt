@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType, ApartmentWithDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { MAP_SERVICE } from "@shared/config";
 import SimpleMap from "@/components/SimpleMap";
 import GoogleMap from "@/components/GoogleMap";
 import Sidebar from "@/components/Sidebar";
@@ -35,12 +35,6 @@ export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
 
-  // Fetch map service configuration
-  const { data: mapConfig, isLoading: isMapConfigLoading } = useQuery({
-    queryKey: ["/api/config/map-service"],
-    retry: false,
-  });
-
   // Component to render based on map service configuration
   const MapComponent = ({ selectedApartmentId, onSelectApartment, onAddApartment, isVisible }: {
     selectedApartmentId: string | null;
@@ -48,19 +42,7 @@ export default function Home() {
     onAddApartment: () => void;
     isVisible: boolean;
   }) => {
-    // Don't render the map until we have the configuration
-    if (isMapConfigLoading) {
-      return (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-neutral-600">Loading map...</p>
-          </div>
-        </div>
-      );
-    }
-    
-    const mapService = (mapConfig as { mapService?: string })?.mapService || 'google';
+    const mapService = MAP_SERVICE;
     
     if (mapService === 'google') {
       return (
