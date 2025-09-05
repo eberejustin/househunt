@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus, Train, Crosshair } from "lucide-react";
+import { Plus, Crosshair } from "lucide-react";
 import type { ApartmentWithDetails } from "@shared/schema";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Loader } from "@googlemaps/js-api-loader";
@@ -26,12 +26,8 @@ export default function GoogleMap({
     [key: string]: google.maps.marker.AdvancedMarkerElement;
   }>({});
   const transitLayerRef = useRef<google.maps.TransitLayer | null>(null);
-  const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isRefReady, setIsRefReady] = useState(false);
-  const [showTransit, setShowTransit] = useState(false);
-  const [showTraffic, setShowTraffic] = useState(false);
-  const [isLoadingTransit, setIsLoadingTransit] = useState(false);
   const { toast } = useToast();
 
   // Ref callback to track when DOM element is ready
@@ -99,9 +95,9 @@ export default function GoogleMap({
           mapId: "DEMO_MAP_ID", // Required for advanced markers
         });
 
-        // Initialize transit and traffic layers
+        // Initialize and enable transit layer
         transitLayerRef.current = new google.maps.TransitLayer();
-        trafficLayerRef.current = new google.maps.TrafficLayer();
+        transitLayerRef.current.setMap(map);
 
         mapInstanceRef.current = map;
         setIsMapReady(true);
@@ -315,55 +311,6 @@ export default function GoogleMap({
     }
   }, [isVisible]);
 
-  // Toggle transit layer
-  const toggleTransit = () => {
-    const map = mapInstanceRef.current;
-    const transitLayer = transitLayerRef.current;
-
-    if (!map || !transitLayer) return;
-
-    setIsLoadingTransit(true);
-
-    if (showTransit) {
-      transitLayer.setMap(null);
-      setShowTransit(false);
-    } else {
-      transitLayer.setMap(map);
-      setShowTransit(true);
-    }
-
-    setIsLoadingTransit(false);
-
-    toast({
-      title: showTransit ? "Transit layer hidden" : "Transit layer shown",
-      description: showTransit
-        ? "Public transit information is now hidden"
-        : "Public transit routes and stops are now visible",
-    });
-  };
-
-  // Toggle traffic layer
-  const toggleTraffic = () => {
-    const map = mapInstanceRef.current;
-    const trafficLayer = trafficLayerRef.current;
-
-    if (!map || !trafficLayer) return;
-
-    if (showTraffic) {
-      trafficLayer.setMap(null);
-      setShowTraffic(false);
-    } else {
-      trafficLayer.setMap(map);
-      setShowTraffic(true);
-    }
-
-    toast({
-      title: showTraffic ? "Traffic layer hidden" : "Traffic layer shown",
-      description: showTraffic
-        ? "Traffic information is now hidden"
-        : "Live traffic conditions are now visible",
-    });
-  };
 
   // Center map on apartment markers
   const centerMap = () => {
@@ -420,37 +367,6 @@ export default function GoogleMap({
           data-testid="button-center-map"
         >
           <Crosshair className="h-4 w-4" />
-        </Button>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleTransit}
-          className={`bg-white shadow-lg hover:bg-neutral-50 ${
-            showTransit ? "bg-blue-50 text-blue-600 border-blue-200" : ""
-          }`}
-          title="Toggle transit overlay"
-          data-testid="button-toggle-transit"
-          disabled={isLoadingTransit}
-        >
-          {isLoadingTransit ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
-          ) : (
-            <Train className="h-4 w-4" />
-          )}
-        </Button>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleTraffic}
-          className={`bg-white shadow-lg hover:bg-neutral-50 ${
-            showTraffic ? "bg-red-50 text-red-600 border-red-200" : ""
-          }`}
-          title="Toggle traffic overlay"
-          data-testid="button-toggle-traffic"
-        >
-          🚗
         </Button>
       </div>
 
