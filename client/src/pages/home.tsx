@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType, ApartmentWithDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import SimpleMap from "@/components/SimpleMap";
 import GoogleMap from "@/components/GoogleMap";
-import MapToggle from "@/components/MapToggle";
 import Sidebar from "@/components/Sidebar";
 import AddApartmentModal from "@/components/AddApartmentModal";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,42 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
+
+  // Fetch map service configuration
+  const { data: mapConfig } = useQuery({
+    queryKey: ["/api/config/map-service"],
+    retry: false,
+  });
+
+  // Component to render based on map service configuration
+  const MapComponent = ({ selectedApartmentId, onSelectApartment, onAddApartment, isVisible }: {
+    selectedApartmentId: string | null;
+    onSelectApartment: (id: string | null) => void;
+    onAddApartment: () => void;
+    isVisible: boolean;
+  }) => {
+    const mapService = (mapConfig as { mapService?: string })?.mapService || 'openstreet';
+    
+    if (mapService === 'google') {
+      return (
+        <GoogleMap
+          selectedApartmentId={selectedApartmentId}
+          onSelectApartment={onSelectApartment}
+          onAddApartment={onAddApartment}
+          isVisible={isVisible}
+        />
+      );
+    }
+    
+    return (
+      <SimpleMap
+        selectedApartmentId={selectedApartmentId}
+        onSelectApartment={onSelectApartment}
+        onAddApartment={onAddApartment}
+        isVisible={isVisible}
+      />
+    );
+  };
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingApartment, setEditingApartment] =
     useState<ApartmentWithDetails | null>(null);
@@ -42,7 +78,6 @@ export default function Home() {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileView, setMobileView] = useState<"list" | "map">("list"); // Default to list on mobile
-  const [mapType, setMapType] = useState<"openstreet" | "google">("openstreet");
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -259,28 +294,14 @@ export default function Home() {
         {/* Desktop: Always show map */}
         {/* Mobile: Show map only when mobileView === 'map' */}
         <div
-          className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1 relative`}
+          className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1`}
         >
-          <MapToggle 
-            currentMapType={mapType}
-            onMapTypeChange={setMapType}
+          <MapComponent
+            selectedApartmentId={selectedApartmentId}
+            onSelectApartment={handleMapMarkerClick}
+            onAddApartment={() => setIsAddModalOpen(true)}
+            isVisible={mobileView === "map" || window.innerWidth >= 768}
           />
-          
-          {mapType === "openstreet" ? (
-            <SimpleMap
-              selectedApartmentId={selectedApartmentId}
-              onSelectApartment={handleMapMarkerClick}
-              onAddApartment={() => setIsAddModalOpen(true)}
-              isVisible={mobileView === "map" || window.innerWidth >= 768}
-            />
-          ) : (
-            <GoogleMap
-              selectedApartmentId={selectedApartmentId}
-              onSelectApartment={handleMapMarkerClick}
-              onAddApartment={() => setIsAddModalOpen(true)}
-              isVisible={mobileView === "map" || window.innerWidth >= 768}
-            />
-          )}
         </div>
       </div>
 

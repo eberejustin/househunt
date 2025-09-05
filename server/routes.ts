@@ -41,6 +41,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/config/map-service', isAuthenticated, async (req: any, res) => {
+    try {
+      // Default to openstreet if not specified
+      const mapService = process.env.MAP_SERVICE || 'openstreet';
+      res.json({ mapService });
+    } catch (error) {
+      console.error("Error fetching map service config:", error);
+      res.status(500).json({ message: "Failed to fetch map service config" });
+    }
+  });
+
   // Apartment routes
   app.get('/api/apartments', isAuthenticated, async (req: any, res) => {
     try {
