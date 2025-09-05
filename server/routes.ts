@@ -43,8 +43,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/config/map-service', isAuthenticated, async (req: any, res) => {
     try {
-      // Default to openstreet if not specified
-      const mapService = process.env.MAP_SERVICE || 'openstreet';
+      // Default to google if not specified
+      const mapService = process.env.MAP_SERVICE || 'google';
       res.json({ mapService });
     } catch (error) {
       console.error("Error fetching map service config:", error);

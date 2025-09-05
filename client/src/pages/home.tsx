@@ -48,7 +48,7 @@ export default function Home() {
     onAddApartment: () => void;
     isVisible: boolean;
   }) => {
-    const mapService = (mapConfig as { mapService?: string })?.mapService || 'openstreet';
+    const mapService = (mapConfig as { mapService?: string })?.mapService || 'google';
     
     if (mapService === 'google') {
       return (
