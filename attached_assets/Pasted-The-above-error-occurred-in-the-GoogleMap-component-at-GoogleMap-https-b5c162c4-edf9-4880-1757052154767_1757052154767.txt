@@ -1,0 +1,94 @@
+The above error occurred in the <GoogleMap> component:
+
+    at GoogleMap (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/src/components/GoogleMap.tsx?t=1757051921314:26:3)
+    at MapComponent (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/src/pages/home.tsx?t=1757051921314:56:26)
+    at div
+    at div
+    at div
+    at Home (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/src/pages/home.tsx?t=1757051921314:49:31)
+    at Route (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=909a93ef:323:16)
+    at Switch (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=909a93ef:379:17)
+    at Router (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/src/App.tsx?t=1757051921314&v=8kwE_rvcPkxPe8YZthC2r:35:42)
+    at Provider (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U27FYV5Z.js?v=909a93ef:38:15)
+    at TooltipProvider (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=909a93ef:64:5)
+    at QueryClientProvider (https://b5c162c4-edf9-4880-8342-6e2b47a991a8-00-1gdxbq96zewk2.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=909a93ef:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608
+logCapturedError @ chunk-RPCDYKBN.js?v=909a93ef:14032
+update.callback @ chunk-RPCDYKBN.js?v=909a93ef:14052
+callCallback @ chunk-RPCDYKBN.js?v=909a93ef:11248
+commitUpdateQueue @ chunk-RPCDYKBN.js?v=909a93ef:11265
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=909a93ef:17093
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=909a93ef:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=909a93ef:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=909a93ef:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=909a93ef:19353
+commitRoot @ chunk-RPCDYKBN.js?v=909a93ef:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=909a93ef:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=909a93ef:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=909a93ef:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=909a93ef:555
+flush @ @tanstack_react-query.js?v=909a93ef:569
+batch @ @tanstack_react-query.js?v=909a93ef:587
+dispatch_fn @ @tanstack_react-query.js?v=909a93ef:996
+setData @ @tanstack_react-query.js?v=909a93ef:696
+onSuccess @ @tanstack_react-query.js?v=909a93ef:897
+resolve @ @tanstack_react-query.js?v=909a93ef:456
+Promise.then
+run @ @tanstack_react-query.js?v=909a93ef:498
+start @ @tanstack_react-query.js?v=909a93ef:536
+fetch @ @tanstack_react-query.js?v=909a93ef:926
+executeFetch_fn @ @tanstack_react-query.js?v=909a93ef:2211
+onSubscribe @ @tanstack_react-query.js?v=909a93ef:1898
+subscribe @ @tanstack_react-query.js?v=909a93ef:24
+(anonymous) @ @tanstack_react-query.js?v=909a93ef:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=909a93ef:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=909a93ef:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=909a93ef:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=909a93ef:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=909a93ef:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=909a93ef:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=909a93ef:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=909a93ef:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=909a93ef:19416
+commitRoot @ chunk-RPCDYKBN.js?v=909a93ef:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=909a93ef:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=909a93ef:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=909a93ef:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=909a93ef:555
+flush @ @tanstack_react-query.js?v=909a93ef:569
+batch @ @tanstack_react-query.js?v=909a93ef:587
+dispatch_fn @ @tanstack_react-query.js?v=909a93ef:996
+setData @ @tanstack_react-query.js?v=909a93ef:696
+onSuccess @ @tanstack_react-query.js?v=909a93ef:897
+resolve @ @tanstack_react-query.js?v=909a93ef:456
+Promise.then
+run @ @tanstack_react-query.js?v=909a93ef:498
+start @ @tanstack_react-query.js?v=909a93ef:536
+fetch @ @tanstack_react-query.js?v=909a93ef:926
+executeFetch_fn @ @tanstack_react-query.js?v=909a93ef:2211
+onSubscribe @ @tanstack_react-query.js?v=909a93ef:1898
+subscribe @ @tanstack_react-query.js?v=909a93ef:24
+(anonymous) @ @tanstack_react-query.js?v=909a93ef:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=909a93ef:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=909a93ef:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=909a93ef:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=909a93ef:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=909a93ef:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=909a93ef:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=909a93ef:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=909a93ef:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=909a93ef:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=909a93ef:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=909a93ef:19432
+commitRoot @ chunk-RPCDYKBN.js?v=909a93ef:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=909a93ef:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=909a93ef:18718
+workLoop @ chunk-RPCDYKBN.js?v=909a93ef:197
+flushWork @ chunk-RPCDYKBN.js?v=909a93ef:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=909a93ef:384
