@@ -60,8 +60,21 @@ export default function GoogleMap({
       if (!mapRef.current || mapInstanceRef.current) return;
 
       try {
+        // Fetch API key from backend
+        const response = await fetch('/api/config/google-maps-key');
+        if (!response.ok) {
+          throw new Error('Failed to fetch Google Maps API key');
+        }
+        const { apiKey } = await response.json();
+        
+        console.log('Google Maps API Key available:', !!apiKey, 'Length:', apiKey.length);
+        
+        if (!apiKey) {
+          throw new Error('Google Maps API key is not available.');
+        }
+        
         const loader = new Loader({
-          apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+          apiKey: apiKey,
           version: "weekly",
           libraries: ["places", "geometry"]
         });

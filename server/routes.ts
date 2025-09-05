@@ -27,6 +27,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Config routes
+  app.get('/api/config/google-maps-key', isAuthenticated, async (req: any, res) => {
+    try {
+      const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ message: "Google Maps API key not configured" });
+      }
+      res.json({ apiKey });
+    } catch (error) {
+      console.error("Error fetching Google Maps API key:", error);
+      res.status(500).json({ message: "Failed to fetch Google Maps API key" });
+    }
+  });
+
   // Apartment routes
   app.get('/api/apartments', isAuthenticated, async (req: any, res) => {
     try {
