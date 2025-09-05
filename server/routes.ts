@@ -41,6 +41,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/config/map-service', isAuthenticated, async (req: any, res) => {
+    try {
+      const mapService = process.env.MAP_SERVICE || 'google';
+      res.json({ mapService });
+    } catch (error) {
+      console.error("Error fetching map service:", error);
+      res.status(500).json({ message: "Failed to fetch map service" });
+    }
+  });
+
 
   // Apartment routes
   app.get('/api/apartments', isAuthenticated, async (req: any, res) => {

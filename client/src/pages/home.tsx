@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType, ApartmentWithDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { MAP_SERVICE } from "@shared/config";
 import SimpleMap from "@/components/SimpleMap";
 import GoogleMap from "@/components/GoogleMap";
 import Sidebar from "@/components/Sidebar";
@@ -38,7 +37,36 @@ const MapComponent = ({ selectedApartmentId, onSelectApartment, onAddApartment, 
   onAddApartment: () => void;
   isVisible: boolean;
 }) => {
-  const mapService = MAP_SERVICE;
+  const [mapService, setMapService] = useState<'google' | 'openstreet'>('google');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMapService = async () => {
+      try {
+        const response = await fetch("/api/config/map-service");
+        if (response.ok) {
+          const data = await response.json();
+          setMapService(data.mapService);
+        }
+      } catch (error) {
+        console.error("Failed to fetch map service config:", error);
+        // Fallback to google maps
+        setMapService('google');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMapService();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+        <div className="text-gray-600">Loading map...</div>
+      </div>
+    );
+  }
   
   if (mapService === 'google') {
     return (
