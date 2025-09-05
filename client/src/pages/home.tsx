@@ -35,35 +35,6 @@ export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
 
-  // Component to render based on map service configuration
-  const MapComponent = ({ selectedApartmentId, onSelectApartment, onAddApartment, isVisible }: {
-    selectedApartmentId: string | null;
-    onSelectApartment: (id: string | null) => void;
-    onAddApartment: () => void;
-    isVisible: boolean;
-  }) => {
-    const mapService = MAP_SERVICE;
-    
-    if (mapService === 'google') {
-      return (
-        <GoogleMap
-          selectedApartmentId={selectedApartmentId}
-          onSelectApartment={onSelectApartment}
-          onAddApartment={onAddApartment}
-          isVisible={isVisible}
-        />
-      );
-    }
-    
-    return (
-      <SimpleMap
-        selectedApartmentId={selectedApartmentId}
-        onSelectApartment={onSelectApartment}
-        onAddApartment={onAddApartment}
-        isVisible={isVisible}
-      />
-    );
-  };
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingApartment, setEditingApartment] =
     useState<ApartmentWithDetails | null>(null);
@@ -290,7 +261,7 @@ export default function Home() {
         <div
           className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1`}
         >
-          <MapComponent
+          <GoogleMap
             selectedApartmentId={selectedApartmentId}
             onSelectApartment={handleMapMarkerClick}
             onAddApartment={() => setIsAddModalOpen(true)}

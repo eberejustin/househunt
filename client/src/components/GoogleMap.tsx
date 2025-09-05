@@ -33,11 +33,9 @@ export default function GoogleMap({
   // Ref callback to track when DOM element is ready
   const mapRefCallback = useCallback(
     (element: HTMLDivElement | null) => {
-      console.log("mapRefCallback called", { element: !!element, currentRef: !!mapRef.current, isRefReady });
       if (element && mapRef.current !== element) {
         mapRef.current = element;
         if (!isRefReady) {
-          console.log("Setting isRefReady to true");
           setIsRefReady(true);
         }
       }
@@ -70,15 +68,10 @@ export default function GoogleMap({
 
   // Initialize Google Maps when the ref is ready
   useEffect(() => {
-    console.log("Map initialization effect triggered", { isRefReady, hasMapRef: !!mapRef.current, hasMapInstance: !!mapInstanceRef.current });
-    
     const initializeMap = async () => {
       if (!isRefReady || !mapRef.current || mapInstanceRef.current) {
-        console.log("Skipping initialization", { isRefReady, hasMapRef: !!mapRef.current, hasMapInstance: !!mapInstanceRef.current });
         return;
       }
-
-      console.log("Starting map initialization...");
 
       try {
         // Fetch API key from backend
@@ -114,7 +107,7 @@ export default function GoogleMap({
         mapInstanceRef.current = map;
         setIsMapReady(true);
 
-        console.log("Google Maps initialized successfully", { mapInstance: !!mapInstanceRef.current });
+        console.log("Google Maps initialized successfully");
       } catch (error) {
         console.error("Error initializing Google Maps:", error);
         toast({
