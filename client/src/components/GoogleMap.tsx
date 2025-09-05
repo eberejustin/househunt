@@ -155,7 +155,8 @@ export default function GoogleMap({
             scale: 0.75,
             background: "#9ca3af", // Grey background
             borderColor: "#6b7280", // Darker grey border
-            glyphColor: "white"
+            glyphColor: "white",
+            glyph: "",
           });
           markerContent = greyPin.element;
         } else if (apartment.isFavorited) {
