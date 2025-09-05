@@ -36,7 +36,7 @@ export default function Home() {
   const { toast } = useToast();
 
   // Fetch map service configuration
-  const { data: mapConfig } = useQuery({
+  const { data: mapConfig, isLoading: isMapConfigLoading } = useQuery({
     queryKey: ["/api/config/map-service"],
     retry: false,
   });
@@ -48,6 +48,18 @@ export default function Home() {
     onAddApartment: () => void;
     isVisible: boolean;
   }) => {
+    // Don't render the map until we have the configuration
+    if (isMapConfigLoading) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-neutral-600">Loading map...</p>
+          </div>
+        </div>
+      );
+    }
+    
     const mapService = (mapConfig as { mapService?: string })?.mapService || 'google';
     
     if (mapService === 'google') {
