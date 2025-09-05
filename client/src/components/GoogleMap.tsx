@@ -113,7 +113,7 @@ export default function GoogleMap({
         mapInstanceRef.current = null;
       }
     };
-  }, [toast]);
+  }, []); // Only run once on mount
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
