@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import type { User as UserType, ApartmentWithDetails } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import SimpleMap from "@/components/SimpleMap";
+import GoogleMap from "@/components/GoogleMap";
+import MapToggle from "@/components/MapToggle";
 import Sidebar from "@/components/Sidebar";
 import AddApartmentModal from "@/components/AddApartmentModal";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,7 @@ export default function Home() {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileView, setMobileView] = useState<"list" | "map">("list"); // Default to list on mobile
+  const [mapType, setMapType] = useState<"openstreet" | "google">("openstreet");
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -256,14 +259,28 @@ export default function Home() {
         {/* Desktop: Always show map */}
         {/* Mobile: Show map only when mobileView === 'map' */}
         <div
-          className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1`}
+          className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1 relative`}
         >
-          <SimpleMap
-            selectedApartmentId={selectedApartmentId}
-            onSelectApartment={handleMapMarkerClick}
-            onAddApartment={() => setIsAddModalOpen(true)}
-            isVisible={mobileView === "map" || window.innerWidth >= 768}
+          <MapToggle 
+            currentMapType={mapType}
+            onMapTypeChange={setMapType}
           />
+          
+          {mapType === "openstreet" ? (
+            <SimpleMap
+              selectedApartmentId={selectedApartmentId}
+              onSelectApartment={handleMapMarkerClick}
+              onAddApartment={() => setIsAddModalOpen(true)}
+              isVisible={mobileView === "map" || window.innerWidth >= 768}
+            />
+          ) : (
+            <GoogleMap
+              selectedApartmentId={selectedApartmentId}
+              onSelectApartment={handleMapMarkerClick}
+              onAddApartment={() => setIsAddModalOpen(true)}
+              isVisible={mobileView === "map" || window.innerWidth >= 768}
+            />
+          )}
         </div>
       </div>
 
