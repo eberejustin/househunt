@@ -31,6 +31,36 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
+// MapComponent defined outside Home to prevent remounting on state changes
+const MapComponent = ({ selectedApartmentId, onSelectApartment, onAddApartment, isVisible }: {
+  selectedApartmentId: string | null;
+  onSelectApartment: (id: string | null) => void;
+  onAddApartment: () => void;
+  isVisible: boolean;
+}) => {
+  const mapService = MAP_SERVICE;
+  
+  if (mapService === 'google') {
+    return (
+      <GoogleMap
+        selectedApartmentId={selectedApartmentId}
+        onSelectApartment={onSelectApartment}
+        onAddApartment={onAddApartment}
+        isVisible={isVisible}
+      />
+    );
+  }
+  
+  return (
+    <SimpleMap
+      selectedApartmentId={selectedApartmentId}
+      onSelectApartment={onSelectApartment}
+      onAddApartment={onAddApartment}
+      isVisible={isVisible}
+    />
+  );
+};
+
 export default function Home() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
@@ -261,7 +291,7 @@ export default function Home() {
         <div
           className={`${mobileView === "map" ? "w-full" : "hidden"} md:block md:flex-1`}
         >
-          <GoogleMap
+          <MapComponent
             selectedApartmentId={selectedApartmentId}
             onSelectApartment={handleMapMarkerClick}
             onAddApartment={() => setIsAddModalOpen(true)}
