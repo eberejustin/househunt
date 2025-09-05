@@ -28,11 +28,19 @@ export default function GoogleMap({
   const transitLayerRef = useRef<google.maps.TransitLayer | null>(null);
   const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [isRefReady, setIsRefReady] = useState(false);
   const [showTransit, setShowTransit] = useState(false);
   const [showTraffic, setShowTraffic] = useState(false);
   const [isLoadingTransit, setIsLoadingTransit] = useState(false);
-  const hasInitializedRef = useRef(false);
   const { toast } = useToast();
+
+  // Ref callback to track when DOM element is ready
+  const mapRefCallback = useCallback((element: HTMLDivElement | null) => {
+    if (element && !isRefReady) {
+      mapRef.current = element;
+      setIsRefReady(true);
+    }
+  }, [isRefReady]);
 
   const {
     data: apartments,
@@ -57,14 +65,12 @@ export default function GoogleMap({
     }
   }, [error]); // Remove toast from dependencies
 
-  // Initialize Google Maps once when component mounts
+  // Initialize Google Maps when the ref is ready
   useEffect(() => {
     const initializeMap = async () => {
-      if (!mapRef.current || mapInstanceRef.current || hasInitializedRef.current) {
+      if (!isRefReady || !mapRef.current || mapInstanceRef.current) {
         return;
       }
-
-      hasInitializedRef.current = true;
 
       try {
         // Fetch API key from backend
@@ -111,16 +117,14 @@ export default function GoogleMap({
       }
     };
 
-    // Delay initialization to ensure DOM is ready
-    const timeoutId = setTimeout(initializeMap, 100);
+    initializeMap();
 
     return () => {
-      clearTimeout(timeoutId);
       if (mapInstanceRef.current) {
         mapInstanceRef.current = null;
       }
     };
-  }, []); // Run only once on mount
+  }, [isRefReady]); // Initialize when ref becomes ready
 
   // Function to add apartment markers
   const addApartmentMarkers = useCallback(() => {
@@ -390,7 +394,7 @@ export default function GoogleMap({
   return (
     <div className="relative flex-1 h-full bg-neutral-100">
       <div
-        ref={mapRef}
+        ref={mapRefCallback}
         className="w-full h-full"
         data-testid="google-map-container"
         style={{
