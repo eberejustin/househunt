@@ -33,12 +33,14 @@ export default function GoogleMap({
   // Ref callback to track when DOM element is ready
   const mapRefCallback = useCallback(
     (element: HTMLDivElement | null) => {
-      if (element && !isRefReady) {
+      if (element && mapRef.current !== element) {
         mapRef.current = element;
-        setIsRefReady(true);
+        if (!isRefReady) {
+          setIsRefReady(true);
+        }
       }
     },
-    [isRefReady],
+    [], // Remove isRefReady dependency to prevent callback recreation
   );
 
   const {
@@ -281,7 +283,7 @@ export default function GoogleMap({
       });
       map.fitBounds(bounds);
     }
-  }, [apartments, onSelectApartment]);
+  }, [apartments]); // Remove onSelectApartment to prevent recreation on state changes
 
   // Update markers when map is ready or apartments change
   useEffect(() => {
