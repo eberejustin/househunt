@@ -138,14 +138,13 @@ export default function GoogleMap({
 
     const apartmentsArray = apartments as ApartmentWithDetails[];
 
-    // create default marker
-    const defaultPin = new google.maps.marker.PinElement({
-      glyph: "🏠",
-    });
-
     apartmentsArray.forEach((apartment) => {
       try {
         let markerContent: HTMLElement | null = null;
+        // create default marker
+        const defaultPin = new google.maps.marker.PinElement({
+          scale: 0.75,
+        });
 
         // Custom styling based on apartment status
         if (apartment.isDeleted) {
