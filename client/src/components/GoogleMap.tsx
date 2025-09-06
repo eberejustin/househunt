@@ -98,6 +98,7 @@ export default function GoogleMap({
           center: { lat: 40.7128, lng: -74.006 },
           zoom: 13,
           mapId: "DEMO_MAP_ID", // Required for advanced markers
+          fullscreenControl: false,
         });
 
         // Initialize and enable transit layer
